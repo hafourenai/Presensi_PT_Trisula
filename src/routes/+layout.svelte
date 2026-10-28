@@ -23,7 +23,7 @@
 
   const role = $derived(data?.profile?.role);
   const isKaryawan = $derived(role === 'karyawan');
-  const isAdminOrOwner = $derived(['administrator', 'pemilik', 'admin_hr'].includes(role));
+  const isAdminOrOwner = $derived(['administrator', 'hr'].includes(role));
   const isSuperAdmin = $derived(role === 'administrator');
 
   // Halaman mandiri (tanpa shell sidebar)

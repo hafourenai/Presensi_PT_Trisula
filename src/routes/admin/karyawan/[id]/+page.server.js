@@ -45,7 +45,7 @@ export const load = async ({ params, url }) => {
 export const actions = {
   updateStatus: async ({ params, request, locals }) => {
     const { user, profile: actor } = await locals.safeGetSession();
-    if (!user || !actor || !['administrator', 'pemilik', 'admin_hr'].includes(actor.role)) {
+    if (!user || !actor || !['administrator', 'hr'].includes(actor.role)) {
       return fail(403, { error: 'Akses ditolak.' });
     }
 
@@ -80,7 +80,7 @@ export const actions = {
 
   resetPassword: async ({ params, request, locals }) => {
     const { user, profile: actor } = await locals.safeGetSession();
-    if (!user || !actor || !['administrator', 'pemilik', 'admin_hr'].includes(actor.role)) {
+    if (!user || !actor || !['administrator', 'hr'].includes(actor.role)) {
       return fail(403, { error: 'Akses ditolak.' });
     }
 
@@ -123,7 +123,7 @@ export const actions = {
 
   updateLocation: async ({ params, request, locals }) => {
     const { user, profile: actor } = await locals.safeGetSession();
-    if (!user || !actor || !['administrator', 'pemilik', 'admin_hr'].includes(actor.role)) {
+    if (!user || !actor || !['administrator', 'hr'].includes(actor.role)) {
       return fail(403, { errorLocation: 'Akses ditolak.' });
     }
 

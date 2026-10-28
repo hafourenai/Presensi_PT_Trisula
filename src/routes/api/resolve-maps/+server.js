@@ -48,7 +48,7 @@ function extractCoordsFromUrl(text) {
 
 export async function POST({ request, locals }) {
   const { user, profile } = await locals.safeGetSession();
-  if (!user || !profile || !['administrator', 'pemilik', 'admin_hr'].includes(profile.role)) {
+  if (!user || !profile || !['administrator', 'hr'].includes(profile.role)) {
     return json({ success: false, message: 'Akses ditolak.' }, { status: 403 });
   }
 

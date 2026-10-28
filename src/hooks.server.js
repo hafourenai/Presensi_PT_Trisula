@@ -37,7 +37,7 @@ export async function handle({ event, resolve }) {
   const hostname = event.url.hostname;
   const isAdminSubdomain = hostname.startsWith('admin.');
   const isKaryawanRole = profile?.role === 'karyawan';
-  const isAdminRole = ['administrator', 'pemilik', 'admin_hr'].includes(profile?.role);
+  const isAdminRole = ['administrator', 'hr'].includes(profile?.role);
 
   // 1. Publik / Tanpa Login
   if (!user && url !== '/login') {

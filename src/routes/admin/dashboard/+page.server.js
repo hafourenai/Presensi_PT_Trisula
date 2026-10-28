@@ -34,7 +34,7 @@ export const load = async () => {
   const { data: latestNotifications } = await supabaseAdmin
     .from('notifications')
     .select('*')
-    .or('target_role.eq.admin_hr,target_role.is.null')
+    .or('target_role.eq.hr,target_role.is.null')
     .order('created_at', { ascending: false })
     .limit(5);
 

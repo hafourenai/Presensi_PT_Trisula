@@ -10,7 +10,7 @@ export const load = async () => {
 export const actions = {
   default: async ({ request, locals }) => {
     const { user, profile: actor } = await locals.safeGetSession();
-    if (!user || !actor || !['administrator', 'pemilik', 'admin_hr'].includes(actor.role)) {
+    if (!user || !actor || !['administrator', 'hr'].includes(actor.role)) {
       return fail(403, { error: 'Akses ditolak.' });
     }
 

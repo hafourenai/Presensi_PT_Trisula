@@ -45,7 +45,7 @@ export async function alertUnrecognizedDevice({ user, profile, deviceId, deviceN
 
   const hrMsg = `Karyawan ${employeeName} (NIP: ${nip}) melakukan presensi dari perangkat tidak terdaftar (${deviceName || browser || 'Unknown'} - ${os || ''}).`;
   await createNotification({
-    targetRole: 'admin_hr',
+    targetRole: 'hr',
     title: alertTitle,
     message: hrMsg,
     type: 'device_mismatch',

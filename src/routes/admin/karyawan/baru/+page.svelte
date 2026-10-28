@@ -143,8 +143,7 @@
             class="mt-1.5 w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-3 text-xs text-slate-700 hover:border-slate-300 focus:border-emerald-500 focus:bg-white focus:outline-none"
           >
             <option value="karyawan">Karyawan (Presensi)</option>
-            <option value="admin_hr">Admin HR</option>
-            <option value="pemilik">Pemilik</option>
+            <option value="hr">HR</option>
             <option value="administrator">Administrator</option>
           </select>
         </div>
