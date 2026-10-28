@@ -42,6 +42,7 @@
   let submitting = $state(false);
   let submitResult = $state(null);
   let activeType = $state('in'); // 'in' or 'out'
+  let attendanceCompleted = $state(false); // Flag untuk lock form setelah submit berhasil
 
   // GPS State & Anti-Fake GPS Signals
   let locationLoading = $state(false);
@@ -62,6 +63,43 @@
   const hasCheckedOut = $derived(!!attendance?.check_out_at);
   let currentDeviceInfo = $state({ deviceName: '', browser: '', os: '' });
 
+  // Validasi waktu kerja
+  function parseTimeString(timeStr) {
+    const [hours, minutes] = timeStr.split(':').map(Number);
+    return hours * 60 + minutes; // Convert to minutes since midnight
+  }
+
+  function getCurrentMinutes() {
+    const now = new Date();
+    return now.getHours() * 60 + now.getMinutes();
+  }
+
+  const workStartMinutes = $derived(parseTimeString(data.settings.work_start));
+  const workEndMinutes = $derived(parseTimeString(data.settings.work_end));
+  let currentMinutes = $state(getCurrentMinutes());
+
+  const timeStatus = $derived(() => {
+    const now = currentMinutes;
+    if (now < workStartMinutes) {
+      const diff = workStartMinutes - now;
+      const hours = Math.floor(diff / 60);
+      const mins = diff % 60;
+      return {
+        allowed: false,
+        message: `Presensi belum dibuka. Dibuka pada ${data.settings.work_start} WIB (dalam ${hours}j ${mins}m)`
+      };
+    } else if (now > workEndMinutes) {
+      return {
+        allowed: false,
+        message: `Presensi sudah ditutup. Jam kerja berakhir pada ${data.settings.work_end} WIB`
+      };
+    }
+    return {
+      allowed: true,
+      message: `Dalam jam kerja: ${data.settings.work_start} - ${data.settings.work_end} WIB`
+    };
+  })();
+
   function updateClock() {
     currentTime = new Intl.DateTimeFormat('id-ID', {
       timeZone: 'Asia/Jakarta',
@@ -75,7 +113,11 @@
   onMount(async () => {
     currentDeviceInfo = getBrowserInfo();
     updateClock();
-    timeInterval = setInterval(updateClock, 1000);
+    timeInterval = setInterval(() => {
+      updateClock();
+      // Force re-evaluation of derived time validation
+      currentMinutes = getCurrentMinutes();
+    }, 1000);
     getLocation();
   });
 
@@ -162,6 +204,15 @@
   }
 
   async function startAttendanceFlow(type) {
+    // Validasi waktu kerja
+    if (!timeStatus.allowed) {
+      submitResult = {
+        success: false,
+        message: timeStatus.message
+      };
+      return;
+    }
+
     activeType = type;
     capturedPhoto = null;
     previewUrl = '';
@@ -294,6 +345,7 @@
       submitting = false;
 
       if (json.success) {
+        attendanceCompleted = true; // Lock form setelah sukses
         // Update state lokal
         if (activeType === 'in') {
           attendance = {
@@ -444,6 +496,14 @@
     </button>
   </div>
 
+  <!-- Work Hours Status Badge -->
+  <div class="flex items-center justify-between rounded-2xl border {timeStatus.allowed ? 'border-emerald-200 bg-emerald-50' : 'border-amber-200 bg-amber-50'} p-4 text-xs shadow-xs">
+    <div class="flex items-center gap-2 {timeStatus.allowed ? 'text-emerald-700' : 'text-amber-700'}">
+      <Clock class="h-4 w-4" />
+      <span>{timeStatus.message}</span>
+    </div>
+  </div>
+
   <!-- Kamera & Action Section -->
   <div class="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-sm">
     {#if cameraError}
@@ -543,7 +603,7 @@
           <span>Ambil Foto</span>
         </button>
       </div>
-    {:else if previewUrl}
+    {:else if previewUrl && !attendanceCompleted}
       <!-- Photo Preview Screen -->
       <div class="text-center">
         <p class="mb-3 text-xs font-semibold text-slate-600">Pratinjau Foto Presensi</p>
@@ -578,11 +638,11 @@
     {:else}
       <!-- Action Buttons When Camera Inactive -->
       <div class="space-y-4">
-        {#if !hasCheckedIn}
+        {#if !hasCheckedIn && !attendanceCompleted}
           <button
             onclick={() => startAttendanceFlow('in')}
-            disabled={cameraLoading}
-            class="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 p-5 text-sm font-bold text-white shadow-lg shadow-emerald-600/25 transition hover:from-emerald-700 hover:to-teal-700 hover:shadow-emerald-600/35 focus:ring-4 focus:ring-emerald-500/20"
+            disabled={cameraLoading || !timeStatus.allowed}
+            class="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 p-5 text-sm font-bold text-white shadow-lg shadow-emerald-600/25 transition hover:from-emerald-700 hover:to-teal-700 hover:shadow-emerald-600/35 focus:ring-4 focus:ring-emerald-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {#if cameraLoading && activeType === 'in'}
               <div class="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
@@ -592,11 +652,14 @@
               <span>Presensi Masuk Sekarang</span>
             {/if}
           </button>
-        {:else if !hasCheckedOut}
+          {#if !timeStatus.allowed}
+            <p class="text-center text-xs text-amber-600 font-medium">{timeStatus.message}</p>
+          {/if}
+        {:else if !hasCheckedOut && !attendanceCompleted}
           <button
             onclick={() => startAttendanceFlow('out')}
-            disabled={cameraLoading}
-            class="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 p-5 text-sm font-bold text-white shadow-lg shadow-blue-600/25 transition hover:from-blue-700 hover:to-indigo-700 hover:shadow-blue-600/35 focus:ring-4 focus:ring-blue-500/20"
+            disabled={cameraLoading || !timeStatus.allowed}
+            class="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 p-5 text-sm font-bold text-white shadow-lg shadow-blue-600/25 transition hover:from-blue-700 hover:to-indigo-700 hover:shadow-blue-600/35 focus:ring-4 focus:ring-blue-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {#if cameraLoading && activeType === 'out'}
               <div class="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
@@ -606,6 +669,9 @@
               <span>Presensi Pulang Sekarang</span>
             {/if}
           </button>
+          {#if !timeStatus.allowed}
+            <p class="text-center text-xs text-amber-600 font-medium">{timeStatus.message}</p>
+          {/if}
         {:else}
           <div class="rounded-2xl border border-emerald-200 bg-emerald-50/70 p-6 text-center">
             <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
