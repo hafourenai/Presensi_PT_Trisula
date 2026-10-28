@@ -1,0 +1,21 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-sans: 'Trebuchet MS', 'Segoe UI', sans-serif;
+  --color-paper: #f5f3ee;
+  --color-ink: #242e2b;
+  --color-muted: #5d6863;
+  --color-rule: #d1d7cf;
+}
+
+@layer base {
+  body {
+    margin: 0;
+    background: var(--color-paper);
+    color: var(--color-ink);
+  }
+
+  ::selection {
+    background: #dae6bc;
+  }
+}

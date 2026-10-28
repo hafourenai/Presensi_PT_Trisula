@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Figma Screen — Laporan & Rekap</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+  </style>
+</head>
+<body class="bg-slate-50 min-h-screen p-6 md:p-8 space-y-6">
+  <div class="flex justify-between items-center">
+    <div>
+      <h1 class="text-2xl font-bold text-slate-900">Laporan Presensi</h1>
+      <p class="text-xs text-slate-500">Rekapitulasi dan ekspor data kehadiran</p>
+    </div>
+    <div class="flex gap-2">
+      <button class="px-3.5 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl text-xs font-semibold">Ekspor Excel (.xlsx)</button>
+      <button class="px-3.5 py-2 bg-slate-900 text-white rounded-xl text-xs font-semibold">Ekspor PDF</button>
+    </div>
+  </div>
+
+  <div class="p-6 bg-white rounded-3xl border border-slate-200">
+    <table class="w-full text-left text-xs">
+      <thead class="border-b border-slate-100 text-slate-400">
+        <tr>
+          <th class="pb-3 uppercase">Tanggal</th>
+          <th class="pb-3 uppercase">Karyawan</th>
+          <th class="pb-3 uppercase">Departemen</th>
+          <th class="pb-3 uppercase">Masuk</th>
+          <th class="pb-3 uppercase">Pulang</th>
+          <th class="pb-3 uppercase">Status</th>
+          <th class="pb-3 uppercase">Jarak</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-100">
+        <tr>
+          <td class="py-3 font-bold text-slate-900">2026-10-07</td>
+          <td class="py-3">
+            <p class="font-bold text-slate-900">Budi Santoso</p>
+            <p class="text-[11px] text-slate-400">KRY002</p>
+          </td>
+          <td class="py-3">Teknologi Informasi</td>
+          <td class="py-3 font-mono">07:58</td>
+          <td class="py-3 font-mono">16:05</td>
+          <td class="py-3"><span class="px-2 py-0.5 bg-emerald-50 text-emerald-700 rounded-full font-bold text-[10px]">Tepat Waktu</span></td>
+          <td class="py-3 text-slate-600">45m</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</body>
+</html>
