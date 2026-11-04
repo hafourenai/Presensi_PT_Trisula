@@ -1,0 +1,37 @@
+- generic [ref=f7e4]:
+  - banner [ref=f7e5]:
+    - generic [ref=f7e6]: Presensi Karyawan
+    - generic [ref=f7e14]:
+      - link "Profil Saya" [ref=f7e15] [cursor=pointer]:
+        - /url: /profil
+      - button "Keluar" [ref=f7e21]
+  - main [ref=f7e25]:
+    - generic [ref=f7e26]:
+      - generic [ref=f7e27]:
+        - generic [ref=f7e28]:
+          - heading "Riwayat Presensi" [level=1] [ref=f7e29]
+          - paragraph [ref=f7e30]: Laporan catatan kehadiran dan foto presensi pribadi Anda
+        - textbox [ref=f7e32]: 2026-11
+      - generic [ref=f7e33]:
+        - generic [ref=f7e34]:
+          - generic [ref=f7e35]: Tepat Waktu
+          - paragraph [ref=f7e40]: "0"
+          - paragraph [ref=f7e41]: Hari
+        - generic [ref=f7e42]:
+          - generic [ref=f7e43]: Terlambat
+          - paragraph [ref=f7e48]: "0"
+          - paragraph [ref=f7e49]: Hari
+        - generic [ref=f7e50]:
+          - generic [ref=f7e51]: Tidak Hadir
+          - paragraph [ref=f7e57]: "0"
+          - paragraph [ref=f7e58]: Hari
+      - generic [ref=f7e59]:
+        - heading "Daftar Presensi (0 Catatan)" [level=3] [ref=f7e60]
+        - paragraph [ref=f7e64]: Belum ada catatan presensi pada bulan ini.
+  - navigation [ref=f7e65]:
+    - link "Presensi" [ref=f7e66] [cursor=pointer]:
+      - /url: /presensi
+    - link "Riwayat" [ref=f7e71] [cursor=pointer]:
+      - /url: /riwayat
+    - link "Profil" [ref=f7e77] [cursor=pointer]:
+      - /url: /profil

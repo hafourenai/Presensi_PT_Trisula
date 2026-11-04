@@ -1,0 +1,39 @@
+- generic [active] [ref=f6e1]:
+  - generic [ref=f6e2]:
+    - generic [ref=f6e98]:
+      - generic [ref=f6e99]:
+        - heading "Presensi Karyawan" [level=1] [ref=f6e102]
+        - paragraph [ref=f6e103]: Sistem Presensi GPS & Deteksi Wajah Internal Perusahaan
+      - generic [ref=f6e104]:
+        - generic [ref=f6e105]:
+          - generic [ref=f6e106]:
+            - generic [ref=f6e107]: NIP / Username / Email
+            - textbox "NIP / Username / Email" [ref=f6e109]:
+              - /placeholder: Masukkan NIP atau Email
+              - text: TEST-MOBILE-001
+            - paragraph [ref=f6e110]: Gunakan NIP/Username yang diberikan oleh Admin HR.
+          - generic [ref=f6e111]:
+            - generic [ref=f6e112]: Kata Sandi
+            - generic [ref=f6e113]:
+              - textbox "Kata Sandi" [ref=f6e114]:
+                - /placeholder: Masukkan kata sandi
+                - text: TestMobile456!
+              - button "Lihat kata sandi" [ref=f6e115]
+          - button "Masuk ke Akun" [ref=f6e118]
+        - paragraph [ref=f6e122]: Belum memiliki akun? Hubungi Administrator atau HR untuk pendaftaran akun karyawan.
+      - generic [ref=f6e123]:
+        - paragraph [ref=f6e124]: Dilindungi dengan Enkripsi SSL/HTTPS & PostgreSQL RLS
+        - paragraph [ref=f6e125]: Waktu server terstandarisasi zona WIB (Asia/Jakarta)
+    - generic [ref=f6e39]: Masuk — Aplikasi Presensi Karyawan
+  - generic [ref=f6e130]:
+    - generic [ref=f6e131]: "[plugin:vite-plugin-svelte] src/routes/presensi/+page.svelte:81:21 `$derived(...)` can only be used as a variable declaration initializer, a class field declaration, or the first assignment to a class field at the top level of the constructor. https://svelte.dev/e/state_invalid_placement"
+    - generic [ref=f6e132]: src/routes/presensi/+page.svelte:81:21
+    - generic [ref=f6e133]: "79 | let currentMinutes = $state(getCurrentMinutes()); 80 | 81 | const timeStatus = $derived(() => { ^ 82 | const now = currentMinutes; 83 | if (now < workStartMinutes) {"
+    - generic [ref=f6e134]:
+      - text: Click outside, press Esc key, or fix the code to dismiss.You can also disable this overlay by setting
+      - code [ref=f6e135]: server.hmr.overlay
+      - text: to
+      - code [ref=f6e136]: "false"
+      - text: in
+      - code [ref=f6e137]: vite.config.js
+      - text: .

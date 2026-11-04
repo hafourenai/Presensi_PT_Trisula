@@ -78,7 +78,7 @@
   const workEndMinutes = $derived(parseTimeString(data.settings.work_end));
   let currentMinutes = $state(getCurrentMinutes());
 
-  const timeStatus = $derived(() => {
+  const timeStatus = $derived.by(() => {
     const now = currentMinutes;
     if (now < workStartMinutes) {
       const diff = workStartMinutes - now;
@@ -98,7 +98,7 @@
       allowed: true,
       message: `Dalam jam kerja: ${data.settings.work_start} - ${data.settings.work_end} WIB`
     };
-  })();
+  });
 
   function updateClock() {
     currentTime = new Intl.DateTimeFormat('id-ID', {

@@ -1,0 +1,113 @@
+- generic [ref=f8e3]:
+  - complementary [ref=f8e4]:
+    - generic [ref=f8e11]:
+      - heading "Admin Portal" [level=2] [ref=f8e12]
+      - paragraph [ref=f8e13]: administrator
+    - navigation [ref=f8e14]:
+      - link "Dashboard" [ref=f8e15] [cursor=pointer]:
+        - /url: /admin/dashboard
+      - link "Kelola Karyawan" [ref=f8e22] [cursor=pointer]:
+        - /url: /admin/karyawan
+      - link "Laporan & Rekap" [ref=f8e29] [cursor=pointer]:
+        - /url: /admin/laporan
+      - paragraph [ref=f8e35]: Kontrol Sistem
+      - link "Monitoring Akun" [ref=f8e36] [cursor=pointer]:
+        - /url: /admin/akun
+      - link "Audit Log" [ref=f8e41] [cursor=pointer]:
+        - /url: /admin/audit-log
+      - link "Pengaturan Jam & GPS" [ref=f8e46] [cursor=pointer]:
+        - /url: /admin/pengaturan
+    - generic [ref=f8e52]:
+      - link "Al Aldi Nova hafourenai@gmail.com" [ref=f8e53] [cursor=pointer]:
+        - /url: /profil
+        - generic [ref=f8e54]: Al
+        - generic [ref=f8e55]:
+          - paragraph [ref=f8e56]: Aldi Nova
+          - paragraph [ref=f8e57]: hafourenai@gmail.com
+      - button "Keluar" [ref=f8e59]
+  - generic [ref=f8e63]:
+    - banner [ref=f8e64]:
+      - generic [ref=f8e65]:
+        - generic [ref=f8e66]:
+          - paragraph [ref=f8e67]: Aldi Nova
+          - paragraph [ref=f8e68]: administrator
+        - link "Profil Saya" [ref=f8e69] [cursor=pointer]:
+          - /url: /profil
+    - main [ref=f8e74]:
+      - generic [ref=f8e75]:
+        - generic [ref=f8e76]:
+          - link [ref=f8e77] [cursor=pointer]:
+            - /url: /admin/karyawan
+          - generic [ref=f8e80]:
+            - heading "Tambah Karyawan Baru" [level=1] [ref=f8e81]
+            - paragraph [ref=f8e82]: Buat kredensial akun dan biodata kepegawaian baru
+        - generic [ref=f8e84]:
+          - generic [ref=f8e85]:
+            - generic [ref=f8e86]:
+              - generic [ref=f8e87]: NIP / Username Presensi *
+              - textbox "NIP / Username Presensi *" [ref=f8e88]:
+                - /placeholder: "Contoh: KRY001"
+                - text: TEST-MOBILE-001
+            - generic [ref=f8e89]:
+              - generic [ref=f8e90]: Nama Lengkap *
+              - textbox "Nama Lengkap *" [ref=f8e91]:
+                - /placeholder: Nama lengkap karyawan
+                - text: Pengguna Uji Mobile
+          - generic [ref=f8e92]:
+            - generic [ref=f8e93]:
+              - generic [ref=f8e94]: Alamat Email *
+              - textbox "Alamat Email *" [active] [ref=f8e95]:
+                - /placeholder: email@perusahaan.com
+                - text: test.mobile.001@example.com
+            - generic [ref=f8e96]:
+              - generic [ref=f8e97]: Role Akun *
+              - combobox "Role Akun *" [ref=f8e98]:
+                - option "Karyawan (Presensi)" [selected]
+                - option "HR"
+                - option "Administrator"
+          - generic [ref=f8e99]:
+            - generic [ref=f8e100]:
+              - generic [ref=f8e101]: Departemen
+              - combobox "Departemen" [ref=f8e102]:
+                - option "Pilih Departemen"
+                - option "Keuangan"
+                - option "Manajemen"
+                - option "Operasional" [selected]
+                - option "SDM"
+                - option "Teknologi Informasi"
+            - generic [ref=f8e103]:
+              - generic [ref=f8e104]: Jabatan / Posisi
+              - textbox "Jabatan / Posisi" [ref=f8e105]:
+                - /placeholder: "Contoh: Staff Operasional"
+          - generic [ref=f8e106]:
+            - generic [ref=f8e108]:
+              - heading "Lokasi Penempatan Kerja Khusus (Opsional)" [level=4] [ref=f8e109]
+              - paragraph [ref=f8e114]: Kosongkan jika karyawan mengikuti lokasi dan radius kantor pusat default.
+            - generic [ref=f8e115]:
+              - generic [ref=f8e116]: Tempel Link Google Maps (maps.app.goo.gl / google.com/maps)
+              - generic [ref=f8e121]:
+                - textbox "Tempel Link Google Maps (maps.app.goo.gl / google.com/maps)" [ref=f8e122]:
+                  - /placeholder: "Contoh: https://maps.app.goo.gl/3YJ3u9xY9ofUjGKU6"
+                - button "Ambil Koordinat" [disabled] [ref=f8e123]
+            - generic [ref=f8e124]:
+              - generic [ref=f8e125]: Nama Lokasi / Cabang
+              - textbox "Nama Lokasi / Cabang" [ref=f8e126]:
+                - /placeholder: "Contoh: Kantor Cabang Surabaya / Proyek A / WFH"
+            - generic [ref=f8e127]:
+              - generic [ref=f8e128]:
+                - generic [ref=f8e129]: Latitude
+                - spinbutton "Latitude" [ref=f8e130]
+              - generic [ref=f8e131]:
+                - generic [ref=f8e132]: Longitude
+                - spinbutton "Longitude" [ref=f8e133]
+              - generic [ref=f8e134]:
+                - generic [ref=f8e135]: Radius (Meter)
+                - spinbutton "Radius (Meter)" [ref=f8e136]
+          - generic [ref=f8e137]:
+            - generic [ref=f8e138]:
+              - generic [ref=f8e139]: Kata Sandi Awal *
+              - button "Buat Acak" [ref=f8e140]
+            - textbox "Kata Sandi Awal *" [ref=f8e142]:
+              - /placeholder: Minimal 8 karakter
+            - paragraph [ref=f8e143]: Karyawan akan menggunakan NIP/Email dan kata sandi ini untuk login pertama kali, lalu otomatis diwajibkan menggantinya.
+          - button "Simpan & Buat Akun Karyawan" [ref=f8e145]

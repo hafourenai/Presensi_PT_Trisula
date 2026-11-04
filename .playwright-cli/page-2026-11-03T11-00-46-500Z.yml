@@ -1,0 +1,54 @@
+- generic [active] [ref=f6e1]:
+  - generic [ref=f6e2]:
+    - generic [ref=f6e44]:
+      - generic [ref=f6e45]:
+        - heading "Aktivasi Akun & Kata Sandi" [level=1] [ref=f6e48]
+        - paragraph [ref=f6e49]: Demi keamanan akun, silakan perbarui kata sandi awal dan setujui ketentuan presensi.
+      - generic [ref=f6e50]:
+        - generic [ref=f6e51]:
+          - generic [ref=f6e52]: Akun Terverifikasi
+          - paragraph [ref=f6e55]:
+            - text: Halo,
+            - strong [ref=f6e56]: Pengguna Uji Mobile
+            - text: (TEST-MOBILE-001). Silakan lengkapi langkah di bawah untuk melanjutkan ke sistem presensi.
+        - generic [ref=f6e57]:
+          - generic [ref=f6e58]:
+            - generic [ref=f6e59]:
+              - generic [ref=f6e60]: Kata Sandi Baru
+              - generic [ref=f6e61]:
+                - textbox "Kata Sandi Baru" [ref=f6e62]:
+                  - /placeholder: Minimal 8 karakter
+                  - text: TestMobile456!
+                - button [ref=f6e63]
+            - generic [ref=f6e65]:
+              - generic [ref=f6e66]: Konfirmasi Kata Sandi Baru
+              - generic [ref=f6e67]:
+                - textbox "Konfirmasi Kata Sandi Baru" [ref=f6e68]:
+                  - /placeholder: Ketik ulang kata sandi baru
+                  - text: TestMobile456!
+                - button [ref=f6e69]
+          - generic [ref=f6e71]:
+            - generic [ref=f6e72]: Persetujuan Pemrosesan Data (UU PDP)
+            - paragraph [ref=f6e75]:
+              - text: Sesuai ketentuan UU Pelindungan Data Pribadi, aplikasi presensi ini akan memproses
+              - strong [ref=f6e76]: foto selfie wajah secara langsung
+              - text: dan
+              - strong [ref=f6e77]: titik koordinat lokasi GPS
+              - text: perangkat Anda secara eksklusif untuk tujuan verifikasi kehadiran kerja internal perusahaan. Foto dan lokasi tersimpan secara aman dan terenkripsi.
+            - generic [ref=f6e78]:
+              - checkbox "Saya memahami dan menyetujui pengumpulan serta pemrosesan data foto dan koordinat GPS untuk keperluan presensi kehadiran kerja." [checked] [ref=f6e79]
+              - generic [ref=f6e80]: Saya memahami dan menyetujui pengumpulan serta pemrosesan data foto dan koordinat GPS untuk keperluan presensi kehadiran kerja.
+          - button "Simpan & Lanjutkan" [ref=f6e82]
+    - generic [ref=f6e39]: Aktivasi Akun & Ganti Kata Sandi — Presensi
+  - generic [ref=f6e89]:
+    - generic [ref=f6e90]: "[plugin:vite-plugin-svelte] src/routes/presensi/+page.svelte:81:21 `$derived(...)` can only be used as a variable declaration initializer, a class field declaration, or the first assignment to a class field at the top level of the constructor. https://svelte.dev/e/state_invalid_placement"
+    - generic [ref=f6e91]: src/routes/presensi/+page.svelte:81:21
+    - generic [ref=f6e92]: "79 | let currentMinutes = $state(getCurrentMinutes()); 80 | 81 | const timeStatus = $derived(() => { ^ 82 | const now = currentMinutes; 83 | if (now < workStartMinutes) {"
+    - generic [ref=f6e93]:
+      - text: Click outside, press Esc key, or fix the code to dismiss.You can also disable this overlay by setting
+      - code [ref=f6e94]: server.hmr.overlay
+      - text: to
+      - code [ref=f6e95]: "false"
+      - text: in
+      - code [ref=f6e96]: vite.config.js
+      - text: .

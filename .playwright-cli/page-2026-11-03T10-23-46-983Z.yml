@@ -1,0 +1,111 @@
+- generic [ref=f2e3]:
+  - complementary [ref=f2e4]:
+    - generic [ref=f2e11]:
+      - heading "Admin Portal" [level=2] [ref=f2e12]
+      - paragraph [ref=f2e13]: administrator
+    - navigation [ref=f2e14]:
+      - link "Dashboard" [ref=f2e15] [cursor=pointer]:
+        - /url: /admin/dashboard
+      - link "Kelola Karyawan" [ref=f2e22] [cursor=pointer]:
+        - /url: /admin/karyawan
+      - link "Laporan & Rekap" [ref=f2e29] [cursor=pointer]:
+        - /url: /admin/laporan
+      - paragraph [ref=f2e35]: Kontrol Sistem
+      - link "Monitoring Akun" [ref=f2e36] [cursor=pointer]:
+        - /url: /admin/akun
+      - link "Audit Log" [ref=f2e41] [cursor=pointer]:
+        - /url: /admin/audit-log
+      - link "Pengaturan Jam & GPS" [ref=f2e46] [cursor=pointer]:
+        - /url: /admin/pengaturan
+    - generic [ref=f2e52]:
+      - link "Al Aldi Nova hafourenai@gmail.com" [ref=f2e53] [cursor=pointer]:
+        - /url: /profil
+        - generic [ref=f2e54]: Al
+        - generic [ref=f2e55]:
+          - paragraph [ref=f2e56]: Aldi Nova
+          - paragraph [ref=f2e57]: hafourenai@gmail.com
+      - button "Keluar" [ref=f2e59]
+  - generic [ref=f2e63]:
+    - banner [ref=f2e64]:
+      - generic [ref=f2e65]:
+        - generic [ref=f2e66]:
+          - paragraph [ref=f2e67]: Aldi Nova
+          - paragraph [ref=f2e68]: administrator
+        - link "Profil Saya" [ref=f2e69] [cursor=pointer]:
+          - /url: /profil
+    - main [ref=f2e74]:
+      - generic [ref=f2e75]:
+        - generic [ref=f2e76]:
+          - generic [ref=f2e77]:
+            - heading "Daftar Karyawan" [level=1] [ref=f2e78]
+            - paragraph [ref=f2e79]: Kelola data kepegawaian dan akun presensi (3 Karyawan)
+          - generic [ref=f2e80]:
+            - link "Impor Massal" [ref=f2e81] [cursor=pointer]:
+              - /url: /admin/karyawan/impor
+            - link "Tambah Karyawan" [ref=f2e86] [cursor=pointer]:
+              - /url: /admin/karyawan/baru
+        - generic [ref=f2e92]:
+          - textbox "Cari nama, NIP, atau email..." [ref=f2e97]
+          - combobox [ref=f2e99]:
+            - option "Semua Departemen" [selected]
+            - option "Keuangan"
+            - option "Manajemen"
+            - option "Operasional"
+            - option "SDM"
+            - option "Teknologi Informasi"
+          - combobox [ref=f2e101]:
+            - option "Semua Status" [selected]
+            - option "Aktif"
+            - option "Nonaktif"
+        - table [ref=f2e104]:
+          - rowgroup [ref=f2e105]:
+            - row [ref=f2e106]:
+              - columnheader "Karyawan" [ref=f2e107]
+              - columnheader "Departemen" [ref=f2e108]
+              - columnheader "Lokasi Kerja" [ref=f2e109]
+              - columnheader "Role" [ref=f2e110]
+              - columnheader "Status" [ref=f2e111]
+              - columnheader "Aksi" [ref=f2e112]
+          - rowgroup [ref=f2e113]:
+            - row [ref=f2e114]:
+              - cell "Si Siti Rahma KRY003 · siti@perusahaan.com" [ref=f2e115]:
+                - generic [ref=f2e116]:
+                  - generic [ref=f2e117]: Si
+                  - generic [ref=f2e118]:
+                    - paragraph [ref=f2e119]: Siti Rahma
+                    - paragraph [ref=f2e120]: KRY003 · siti@perusahaan.com
+              - cell "Keuangan" [ref=f2e121]
+              - cell "Kantor Pusat" [ref=f2e122]
+              - cell "karyawan" [ref=f2e123]
+              - cell "Aktif" [ref=f2e124]
+              - cell [ref=f2e130]:
+                - link "Detail" [ref=f2e131] [cursor=pointer]:
+                  - /url: /admin/karyawan/440be5c8-e155-48a7-b12b-2fb15b1b4e4c
+            - row [ref=f2e136]:
+              - cell "Bu Budi Santoso KRY002 · budi@perusahaan.com" [ref=f2e137]:
+                - generic [ref=f2e138]:
+                  - generic [ref=f2e139]: Bu
+                  - generic [ref=f2e140]:
+                    - paragraph [ref=f2e141]: Budi Santoso
+                    - paragraph [ref=f2e142]: KRY002 · budi@perusahaan.com
+              - cell "Teknologi Informasi" [ref=f2e143]
+              - cell "Kantor Pusat" [ref=f2e144]
+              - cell "karyawan" [ref=f2e145]
+              - cell "Aktif" [ref=f2e146]
+              - cell [ref=f2e152]:
+                - link "Detail" [ref=f2e153] [cursor=pointer]:
+                  - /url: /admin/karyawan/4153e664-5e36-45ba-ba58-79a8cdaa2aa3
+            - row [ref=f2e158]:
+              - cell "Al Aldi Nova ADM001 · hafourenai@gmail.com" [ref=f2e159]:
+                - generic [ref=f2e160]:
+                  - generic [ref=f2e161]: Al
+                  - generic [ref=f2e162]:
+                    - paragraph [ref=f2e163]: Aldi Nova
+                    - paragraph [ref=f2e164]: ADM001 · hafourenai@gmail.com
+              - cell "-" [ref=f2e165]
+              - cell "Kantor Pusat" [ref=f2e166]
+              - cell "administrator" [ref=f2e167]
+              - cell "Aktif" [ref=f2e168]
+              - cell [ref=f2e174]:
+                - link "Detail" [ref=f2e175] [cursor=pointer]:
+                  - /url: /admin/karyawan/f713fd1c-fa51-4f87-8550-20549da9bc8d

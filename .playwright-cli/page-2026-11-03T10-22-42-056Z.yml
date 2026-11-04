@@ -1,0 +1,22 @@
+- generic [ref=e4]:
+  - generic [ref=e5]:
+    - heading "Presensi Karyawan" [level=1] [ref=e11]
+    - paragraph [ref=e12]: Sistem Presensi GPS & Deteksi Wajah Internal Perusahaan
+  - generic [ref=e13]:
+    - generic [ref=e14]:
+      - generic [ref=e15]:
+        - generic [ref=e16]: NIP / Username / Email
+        - textbox "NIP / Username / Email" [ref=e18]:
+          - /placeholder: Masukkan NIP atau Email
+        - paragraph [ref=e19]: Gunakan NIP/Username yang diberikan oleh Admin HR.
+      - generic [ref=e20]:
+        - generic [ref=e21]: Kata Sandi
+        - generic [ref=e22]:
+          - textbox "Kata Sandi" [ref=e23]:
+            - /placeholder: Masukkan kata sandi
+          - button "Lihat kata sandi" [ref=e24]
+      - button "Masuk ke Akun" [ref=e29]
+    - paragraph [ref=e35]: Belum memiliki akun? Hubungi Administrator atau HR untuk pendaftaran akun karyawan.
+  - generic [ref=e36]:
+    - paragraph [ref=e37]: Dilindungi dengan Enkripsi SSL/HTTPS & PostgreSQL RLS
+    - paragraph [ref=e38]: Waktu server terstandarisasi zona WIB (Asia/Jakarta)

@@ -1,0 +1,64 @@
+- generic [ref=f8e4]:
+  - banner [ref=f8e5]:
+    - generic [ref=f8e6]: Presensi Karyawan
+    - generic [ref=f8e14]:
+      - link "Profil Saya" [ref=f8e15] [cursor=pointer]:
+        - /url: /profil
+      - button "Keluar" [ref=f8e21]
+  - main [ref=f8e25]:
+    - generic [ref=f8e26]:
+      - generic [ref=f8e27]:
+        - heading "Profil & Biodata" [level=1] [ref=f8e28]
+        - paragraph [ref=f8e29]: Informasi data kepegawaian dan pengaturan akun Anda
+      - generic [ref=f8e30]:
+        - generic [ref=f8e31]:
+          - generic [ref=f8e32]: Pe
+          - generic [ref=f8e33]:
+            - heading "Pengguna Uji Mobile" [level=2] [ref=f8e34]
+            - generic [ref=f8e35]:
+              - generic [ref=f8e36]: karyawan
+              - generic [ref=f8e37]: "NIP: TEST-MOBILE-001"
+        - generic [ref=f8e38]:
+          - generic [ref=f8e39]:
+            - text: Departemen
+            - paragraph [ref=f8e40]: Belum diatur
+          - generic [ref=f8e41]:
+            - text: Jabatan / Posisi
+            - paragraph [ref=f8e42]: Tester UI
+          - generic [ref=f8e43]:
+            - text: Alamat Email
+            - paragraph [ref=f8e44]: test.mobile.001@example.com
+          - generic [ref=f8e45]:
+            - text: Tanggal Bergabung
+            - paragraph [ref=f8e46]: Belum diatur
+      - generic [ref=f8e47]:
+        - heading "Perbarui Kontak & Alamat" [level=3] [ref=f8e48]
+        - generic [ref=f8e49]:
+          - generic [ref=f8e50]:
+            - generic [ref=f8e51]: Nomor Telepon / WhatsApp
+            - textbox "Nomor Telepon / WhatsApp" [ref=f8e52]:
+              - /placeholder: 0812xxxxxxxx
+          - generic [ref=f8e53]:
+            - generic [ref=f8e54]: Alamat Tempat Tinggal
+            - textbox "Alamat Tempat Tinggal" [ref=f8e55]:
+              - /placeholder: Alamat lengkap domisili
+          - button "Simpan Kontak" [ref=f8e56]
+      - generic [ref=f8e57]:
+        - heading "Ubah Kata Sandi Akun" [level=3] [ref=f8e58]
+        - generic [ref=f8e59]:
+          - generic [ref=f8e60]:
+            - generic [ref=f8e61]: Kata Sandi Baru
+            - textbox "Kata Sandi Baru" [ref=f8e62]:
+              - /placeholder: Minimal 8 karakter
+          - generic [ref=f8e63]:
+            - generic [ref=f8e64]: Konfirmasi Kata Sandi
+            - textbox "Konfirmasi Kata Sandi" [ref=f8e65]:
+              - /placeholder: Ulangi kata sandi baru
+          - button "Perbarui Kata Sandi" [ref=f8e66]
+  - navigation [ref=f8e67]:
+    - link "Presensi" [ref=f8e68] [cursor=pointer]:
+      - /url: /presensi
+    - link "Riwayat" [ref=f8e73] [cursor=pointer]:
+      - /url: /riwayat
+    - link "Profil" [ref=f8e79] [cursor=pointer]:
+      - /url: /profil

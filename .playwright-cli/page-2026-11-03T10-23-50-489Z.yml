@@ -1,0 +1,85 @@
+- generic [ref=f3e3]:
+  - complementary [ref=f3e4]:
+    - generic [ref=f3e11]:
+      - heading "Admin Portal" [level=2] [ref=f3e12]
+      - paragraph [ref=f3e13]: administrator
+    - navigation [ref=f3e14]:
+      - link "Dashboard" [ref=f3e15] [cursor=pointer]:
+        - /url: /admin/dashboard
+      - link "Kelola Karyawan" [ref=f3e22] [cursor=pointer]:
+        - /url: /admin/karyawan
+      - link "Laporan & Rekap" [ref=f3e29] [cursor=pointer]:
+        - /url: /admin/laporan
+      - paragraph [ref=f3e35]: Kontrol Sistem
+      - link "Monitoring Akun" [ref=f3e36] [cursor=pointer]:
+        - /url: /admin/akun
+      - link "Audit Log" [ref=f3e41] [cursor=pointer]:
+        - /url: /admin/audit-log
+      - link "Pengaturan Jam & GPS" [ref=f3e46] [cursor=pointer]:
+        - /url: /admin/pengaturan
+    - generic [ref=f3e52]:
+      - link "Al Aldi Nova hafourenai@gmail.com" [ref=f3e53] [cursor=pointer]:
+        - /url: /profil
+        - generic [ref=f3e54]: Al
+        - generic [ref=f3e55]:
+          - paragraph [ref=f3e56]: Aldi Nova
+          - paragraph [ref=f3e57]: hafourenai@gmail.com
+      - button "Keluar" [ref=f3e59]
+  - generic [ref=f3e63]:
+    - banner [ref=f3e64]:
+      - generic [ref=f3e65]:
+        - generic [ref=f3e66]:
+          - paragraph [ref=f3e67]: Aldi Nova
+          - paragraph [ref=f3e68]: administrator
+        - link "Profil Saya" [ref=f3e69] [cursor=pointer]:
+          - /url: /profil
+    - main [ref=f3e74]:
+      - generic [ref=f3e75]:
+        - generic [ref=f3e76]:
+          - generic [ref=f3e77]:
+            - heading "Laporan & Rekap Presensi" [level=1] [ref=f3e78]
+            - paragraph [ref=f3e79]: Rekapitulasi kehadiran 0 karyawan dan riwayat 0 presensi
+          - generic [ref=f3e80]:
+            - button "Ekspor Excel (.xlsx)" [ref=f3e81]
+            - button "Ekspor PDF" [ref=f3e86]
+        - generic [ref=f3e92]:
+          - generic [ref=f3e93]:
+            - generic [ref=f3e94]:
+              - generic [ref=f3e95]: Dari Tanggal
+              - textbox "Dari Tanggal" [ref=f3e96]: 2026-11-01
+            - generic [ref=f3e97]:
+              - generic [ref=f3e98]: Sampai Tanggal
+              - textbox "Sampai Tanggal" [ref=f3e99]: 2026-11-03
+            - generic [ref=f3e100]:
+              - generic [ref=f3e101]: Departemen
+              - combobox "Departemen" [ref=f3e102]:
+                - option "Semua Departemen" [selected]
+                - option "Keuangan"
+                - option "Manajemen"
+                - option "Operasional"
+                - option "SDM"
+                - option "Teknologi Informasi"
+            - generic [ref=f3e103]:
+              - generic [ref=f3e104]: Karyawan
+              - combobox "Karyawan" [ref=f3e105]:
+                - option "Semua Karyawan" [selected]
+                - option "Aldi Nova (ADM001)"
+                - option "Budi Santoso (KRY002)"
+                - option "Siti Rahma (KRY003)"
+          - generic [ref=f3e106]:
+            - generic [ref=f3e107]:
+              - generic [ref=f3e108]:
+                - generic [ref=f3e109]: Status Kehadiran
+                - combobox "Status Kehadiran" [ref=f3e110]:
+                  - option "Semua Status" [selected]
+                  - option "Tepat Waktu"
+                  - option "Terlambat"
+                  - option "Tidak Hadir"
+              - generic [ref=f3e111] [cursor=pointer]:
+                - checkbox "Hanya yang di luar radius (100m)" [ref=f3e112]
+                - generic [ref=f3e113]: Hanya yang di luar radius (100m)
+            - button "Terapkan Filter" [ref=f3e115]
+        - generic [ref=f3e117]:
+          - button "Riwayat Presensi (0)" [ref=f3e118]
+          - button "Rekapitulasi Karyawan (0)" [ref=f3e122]
+        - generic [ref=f3e129]: Tidak ada data presensi yang sesuai dengan filter.
