@@ -1,0 +1,14 @@
+<!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Troubleshooting · Trisula Docs</title><link rel="stylesheet" href="assets/docs.css"></head><body><header class="topbar"><div class="topbar-inner"><a class="brand" href="./">Trisula<span>Docs</span></a><nav><a href="./">Mulai</a><a href="build.html">Build</a><a href="deployment.html">Deployment</a><a href="operations.html">Operasional</a><a class="active" href="troubleshooting.html">Troubleshooting</a></nav></div></header><section class="hero"><div class="hero-inner"><span class="kicker">Referensi pemulihan</span><h1>Temukan masalah dari gejalanya.</h1><p>Mulai dari pemeriksaan yang aman sebelum mengubah atau menghentikan service.</p></div></section><div class="layout"><aside class="toc"><strong>Masalah</strong><a href="#build">Build gagal</a><a href="#health">Tidak healthy</a><a href="#port">Port terpakai</a><a href="#domain">Domain 404</a><a href="#ssl">HTTPS</a></aside><main>
+<section class="card" id="build"><h2>Build gagal karena environment</h2><pre><code>git pull --ff-only origin main
+docker compose config --quiet
+docker compose build</code></pre><p>Jangan memasukkan secret sebagai build argument. Client Supabase admin telah diubah agar dibuat saat runtime.</p></section>
+<section class="card" id="health"><h2>Container tidak healthy</h2><pre><code>docker compose ps
+docker compose logs --tail=200 app</code></pre><p>Periksa nama environment, koneksi Supabase, serta error startup.</p></section>
+<section class="card" id="port"><h2>Port sudah digunakan</h2><pre><code>ss -lntp | grep ':PORT '</code></pre><p>Jangan menghentikan service yang tidak dikenal. Pilih port loopback kosong dan ubah <code>APP_PORT</code>.</p></section>
+<section class="card" id="domain"><h2>Domain menghasilkan 404</h2><pre><code>curl -I -H "Host: presensi.example.com" http://127.0.0.1/login
+nginx -t
+systemctl reload nginx</code></pre><p>Periksa DNS, nama <code>server_name</code>, symlink <code>sites-enabled</code>, dan konfigurasi domain pada provider VPS.</p></section>
+<section class="card" id="ssl"><h2>HTTPS bermasalah</h2><pre><code>certbot certificates
+certbot renew --dry-run
+tail -n 100 /var/log/letsencrypt/letsencrypt.log</code></pre><p>Pastikan DNS benar dan port 80/443 dibuka firewall.</p></section>
+</main></div><footer>TrisulaDocs · Troubleshooting</footer><script src="assets/docs.js"></script></body></html>

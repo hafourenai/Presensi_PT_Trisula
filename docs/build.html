@@ -1,0 +1,12 @@
+<!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Build · Trisula Docs</title><link rel="stylesheet" href="assets/docs.css"></head><body><header class="topbar"><div class="topbar-inner"><a class="brand" href="./">Trisula<span>Docs</span></a><nav><a href="./">Mulai</a><a class="active" href="build.html">Build</a><a href="deployment.html">Deployment</a><a href="operations.html">Operasional</a><a href="troubleshooting.html">Troubleshooting</a></nav></div></header><section class="hero"><div class="hero-inner"><span class="kicker">Tahap 01</span><h1>Build aplikasi</h1><p>Persiapkan environment dan hasilkan image produksi tanpa memasukkan secret ke build context.</p></div></section><div class="layout"><aside class="toc"><strong>Di halaman ini</strong><a href="#env">Environment</a><a href="#validate">Validasi</a><a href="#build">Build image</a><a href="#result">Hasil</a></aside><main>
+<section class="card" id="env"><h2>1. Siapkan environment</h2><pre><code>cp .env.example .env
+nano .env
+chmod 600 .env</code></pre><p>Isi menggunakan nilai produksi. Jangan menyalin `.env` ke Git, image, screenshot, atau chat.</p><pre><code>DOMAIN=presensi.example.com
+APP_PORT=3002
+PUBLIC_SUPABASE_URL=https://PROJECT_REF.supabase.co
+PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_xxx
+SUPABASE_SECRET_KEY=sb_secret_xxx</code></pre></section>
+<section class="card" id="validate"><h2>2. Validasi Compose</h2><pre><code>docker compose config --quiet</code></pre><p>Perintah berhasil bila tidak menghasilkan output. Jangan gunakan `docker compose config` tanpa `--quiet` saat membagikan hasil karena nilai environment dapat ikut tercetak.</p></section>
+<section class="card" id="build"><h2>3. Bangun image</h2><pre><code>docker compose build</code></pre><p>Build pertama membutuhkan waktu lebih lama. Warning Svelte tidak menghentikan build; perhatikan baris terakhir dan exit code.</p></section>
+<section class="card" id="result"><h2>4. Verifikasi image</h2><pre><code>docker image ls presensi-app</code></pre><p class="note">Image siap digunakan jika bernama <code>presensi-app:latest</code> dan proses build berakhir dengan status sukses.</p></section>
+</main></div><footer>TrisulaDocs · Build</footer><script src="assets/docs.js"></script></body></html>

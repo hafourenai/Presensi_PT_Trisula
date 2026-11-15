@@ -1,0 +1,29 @@
+<!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Deployment · Trisula Docs</title><link rel="stylesheet" href="assets/docs.css"></head><body><header class="topbar"><div class="topbar-inner"><a class="brand" href="./">Trisula<span>Docs</span></a><nav><a href="./">Mulai</a><a href="build.html">Build</a><a class="active" href="deployment.html">Deployment</a><a href="operations.html">Operasional</a><a href="troubleshooting.html">Troubleshooting</a></nav></div></header><section class="hero"><div class="hero-inner"><span class="kicker">Tahap 02</span><h1>Deployment pertama</h1><p>Jalankan container, hubungkan Nginx, terbitkan HTTPS, lalu arahkan Supabase Auth.</p></div></section><div class="layout"><aside class="toc"><strong>Di halaman ini</strong><a href="#dns">DNS</a><a href="#run">Container</a><a href="#nginx">Nginx</a><a href="#ssl">HTTPS</a><a href="#auth">Supabase</a></aside><main>
+<section class="card" id="dns"><h2>1. Arahkan DNS</h2><pre><code>Nama: presensi
+Tipe: A
+Nilai: IP_VPS
+TTL: 3600</code></pre><pre><code>nslookup presensi.example.com</code></pre></section>
+<section class="card" id="run"><h2>2. Jalankan aplikasi</h2><pre><code>docker compose up -d app --remove-orphans
+docker compose ps
+curl -I http://127.0.0.1:3002/login</code></pre><p>Status container harus <code>healthy</code> dan endpoint lokal menghasilkan HTTP 200.</p></section>
+<section class="card" id="nginx"><h2>3. Konfigurasi Nginx</h2><pre><code>server {
+    listen 80;
+    server_name presensi.example.com;
+    client_max_body_size 10m;
+    location / {
+        proxy_pass http://127.0.0.1:3002;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}</code></pre><pre><code>nginx -t
+systemctl reload nginx</code></pre></section>
+<section class="card" id="ssl"><h2>4. Terbitkan HTTPS</h2><pre><code>certbot --nginx -d presensi.example.com
+certbot renew --dry-run</code></pre></section>
+<section class="card" id="auth"><h2>5. Atur Supabase Auth</h2><pre><code>Site URL:
+https://presensi.example.com
+
+Redirect URL:
+https://presensi.example.com/**</code></pre><p class="note">Selesaikan dengan membuka halaman login melalui HTTPS dan menguji akun administrator.</p></section>
+</main></div><footer>TrisulaDocs · Deployment</footer><script src="assets/docs.js"></script></body></html>

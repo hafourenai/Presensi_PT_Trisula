@@ -63,7 +63,7 @@ Jika Anda menggunakan alur Git lain, unggah isi folder proyek sebagai root repos
 
 ## Deployment VPS
 
-Deployment produksi menggunakan image Node.js 22 dan Docker Compose, dengan Caddy bawaan atau Nginx existing. Ikuti [panduan deployment VPS](./docs/deployment-vps.md) atau buka [panduan HTML mandiri](./docs/deployment-vps.html) langsung di browser.
+Deployment produksi menggunakan image Node.js 22 dan Docker Compose, dengan Caddy bawaan atau Nginx existing. Buka [portal dokumentasi](https://hafourenai.github.io/Presensi_PT_Trisula/) untuk panduan Build, Deployment, Operasional, dan Troubleshooting. Referensi lengkap versi Markdown tetap tersedia di [docs/deployment-vps.md](./docs/deployment-vps.md).
 
 ## Pemeriksaan Fase 0
 
