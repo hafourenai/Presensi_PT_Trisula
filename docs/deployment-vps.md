@@ -245,3 +245,70 @@ docker image prune -f
 ```
 
 Dengan 2 vCPU, RAM 4 GB, dan disk 60 GB, konfigurasi dua container ini mencukupi. Hindari menjalankan Supabase self-hosted pada VPS yang sama agar kapasitas RAM tetap aman.
+
+## 11. Catatan deployment aktual PT Trisula
+
+Deployment produksi dilakukan pada 15 November 2026 dengan hasil berikut:
+
+- Domain: `presensi.trisulaprimaagung.my.id`
+- VPS: Ubuntu 24.04, 2 vCPU, RAM 4 GB, NVMe 60 GB
+- Docker 29.1.3, Docker Compose 2.40.3, Git 2.43.0
+- Nginx host sudah digunakan proyek lain pada port 80/443
+- Port 3000 dan 3001 juga sudah digunakan; aplikasi presensi memakai `127.0.0.1:3002`
+- Sertifikat Let's Encrypt diterbitkan melalui Certbot dan diperpanjang otomatis
+- Login administrator berhasil diuji melalui HTTPS
+
+### Error build Supabase
+
+Build pertama berhenti dengan pesan `SUPABASE_SECRET_KEY wajib tersedia`. Ini bukan karena `.env` salah. Secret sengaja tidak dimasukkan ke Docker build context, tetapi client admin saat itu diinisialisasi terlalu dini. Commit `0449008` memperbaikinya dengan menunda pembuatan client sampai runtime.
+
+```sh
+git pull --ff-only origin main
+docker compose build
+```
+
+### Konflik port Caddy dan Nginx
+
+Caddy tidak dijalankan karena port 80 sudah dipakai Nginx proyek lain. Commit `710fd1b` menjadikan Caddy opsional dan memublikasikan aplikasi hanya ke loopback port yang dapat dikonfigurasi.
+
+```sh
+docker compose up -d app --remove-orphans
+docker compose ps
+curl -I http://127.0.0.1:3002/login
+```
+
+### Konfigurasi Nginx produksi
+
+File `/etc/nginx/sites-available/presensi.trisulaprimaagung.my.id` sebelum dimodifikasi Certbot:
+
+```nginx
+server {
+    listen 80;
+    listen [::]:80;
+    server_name presensi.trisulaprimaagung.my.id;
+    client_max_body_size 10m;
+
+    location / {
+        proxy_pass http://127.0.0.1:3002;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_read_timeout 120s;
+        proxy_send_timeout 120s;
+    }
+}
+```
+
+### Checklist hasil akhir
+
+- `docker compose ps` menunjukkan aplikasi `healthy`.
+- `curl -I http://127.0.0.1:3002/login` menghasilkan HTTP 200.
+- `nginx -t` berhasil sebelum reload.
+- `curl -I https://presensi.trisulaprimaagung.my.id/login` menghasilkan HTTP 200.
+- Supabase Site URL: `https://presensi.trisulaprimaagung.my.id`.
+- Supabase Redirect URL: `https://presensi.trisulaprimaagung.my.id/**`.
+- Jangan membuka port 3002 pada firewall; akses publik harus melalui Nginx HTTPS.

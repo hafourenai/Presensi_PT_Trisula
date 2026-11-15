@@ -63,7 +63,7 @@ Jika Anda menggunakan alur Git lain, unggah isi folder proyek sebagai root repos
 
 ## Deployment VPS
 
-Deployment produksi menggunakan image Node.js 22, Docker Compose, dan Caddy. VPS hanya perlu Docker, Docker Compose, Git, domain yang sudah mengarah ke VPS, dan port 80/443 terbuka. Ikuti [panduan deployment VPS lengkap](./docs/deployment-vps.md).
+Deployment produksi menggunakan image Node.js 22 dan Docker Compose, dengan Caddy bawaan atau Nginx existing. Ikuti [panduan deployment VPS](./docs/deployment-vps.md) atau buka [panduan HTML mandiri](./docs/deployment-vps.html) langsung di browser.
 
 ## Pemeriksaan Fase 0
 
