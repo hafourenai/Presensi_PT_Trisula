@@ -1,6 +1,6 @@
 # Deployment produksi ke VPS dengan Docker
 
-Panduan ini ditujukan untuk VPS Ubuntu/Debian yang sudah memiliki Docker. Arsitektur produksi terdiri dari satu container SvelteKit dan satu container Caddy. Caddy menangani reverse proxy serta sertifikat HTTPS Let's Encrypt secara otomatis. Database, autentikasi, dan storage tetap menggunakan Supabase Cloud.
+Panduan ini ditujukan untuk VPS Ubuntu/Debian yang sudah memiliki Docker. Aplikasi berjalan dalam container SvelteKit. Reverse proxy dapat memakai Caddy bawaan atau Nginx yang sudah digunakan proyek lain. Database, autentikasi, dan storage tetap menggunakan Supabase Cloud.
 
 ## 1. Siapkan domain dan Supabase
 

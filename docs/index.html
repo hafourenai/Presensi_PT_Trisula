@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Panduan lengkap deployment Sistem Presensi PT Trisula ke VPS dengan Docker, Nginx, HTTPS, dan Supabase.">
+<title>Panduan Deployment VPS — Presensi PT Trisula</title>
+<style>
+:root{--forest:#0e3b2e;--forest-2:#174f3e;--lime:#c8f169;--paper:#f4f1ea;--white:#fff;--ink:#14231c;--muted:#5b6b63;--rule:#d8d2c5;--code:#102b22}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.72 'Segoe UI',sans-serif}header{padding:72px 24px 64px;background:var(--forest);color:#fff}header>div,.shell{max-width:1040px;margin:auto}.eyebrow{display:inline-block;padding:7px 13px;border-radius:99px;background:var(--lime);color:var(--forest);font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}header h1{max-width:800px;margin:20px 0 16px;font-size:clamp(40px,7vw,72px);line-height:1;letter-spacing:-3px}header p{max-width:720px;margin:0;color:#bfd3c8;font-size:18px}.status{display:flex;flex-wrap:wrap;gap:10px;margin-top:28px}.status span{padding:7px 11px;border:1px solid #477061;border-radius:8px;font-size:13px}.shell{display:grid;grid-template-columns:220px minmax(0,1fr);gap:36px;padding:36px 20px 90px}aside{position:sticky;top:20px;align-self:start;padding:18px;border:1px solid var(--rule);border-radius:16px;background:#fff}aside strong{font-size:13px;text-transform:uppercase;letter-spacing:.08em}aside a{display:block;padding:7px 0;color:var(--muted);font-size:14px;text-decoration:none}aside a:hover{color:var(--forest)}article{min-width:0;padding:10px 34px 42px;border:1px solid var(--rule);border-radius:20px;background:#fff}article>h1{display:none}h2{margin:48px 0 14px;padding-top:8px;font-size:30px;line-height:1.2;letter-spacing:-.8px;border-top:1px solid var(--rule)}h2:first-of-type{margin-top:20px;border:0}h3{margin:32px 0 10px;font-size:20px}p{margin:10px 0}a{color:var(--forest-2)}strong{font-weight:750}code{padding:2px 6px;border-radius:5px;background:#ebe7dd;font:14px ui-monospace,SFMono-Regular,Consolas,monospace}pre{overflow:auto;margin:15px 0;padding:18px 20px;border-radius:13px;background:var(--code);color:#e9f4ee;box-shadow:inset 0 0 0 1px #25473c}pre code{padding:0;background:none;color:inherit}li{margin:6px 0}blockquote{margin:18px 0;padding:12px 18px;border-left:4px solid var(--lime);background:#eef3df}table{display:block;overflow:auto;width:100%;border-collapse:collapse}th,td{padding:11px;border-bottom:1px solid var(--rule);text-align:left}footer{padding:30px;text-align:center;color:var(--muted)}@media(max-width:800px){header{padding:48px 20px}header h1{letter-spacing:-2px}.shell{display:block;padding:18px 12px 60px}aside{position:static;margin-bottom:16px}article{padding:8px 18px 32px}h2{font-size:25px}}@media print{header{padding:24px}.shell{display:block;padding:0}aside{display:none}article{border:0}h2{break-after:avoid}pre{break-inside:avoid}}
+</style>
+</head>
+<body>
+<header><div><span class="eyebrow">Runbook Produksi</span><h1>Deployment VPS Sistem Presensi</h1><p>Panduan lengkap dan catatan aktual deployment PT Trisula: Docker, Nginx, HTTPS, Supabase, update, rollback, dan troubleshooting.</p><div class="status"><span>✓ Production live</span><span>presensi.trisulaprimaagung.my.id</span><span>Diperbarui 15 November 2026</span></div></div></header>
+<div class="shell"><aside><strong>Navigasi</strong><a href="#1-siapkan-domain-dan-supabase">Domain & Supabase</a><a href="#2-masuk-dan-periksa-vps">Persiapan VPS</a><a href="#6-build-dan-jalankan-aplikasi">Build aplikasi</a><a href="#7-menyiapkan-database-dan-administrator-pertama">Database</a><a href="#8-update-setiap-ada-commit-baru">Update</a><a href="#10-troubleshooting">Troubleshooting</a><a href="#11-catatan-deployment-aktual-pt-trisula">Catatan aktual</a></aside><article><h1>Deployment produksi ke VPS dengan Docker</h1>
+<p>Panduan ini ditujukan untuk VPS Ubuntu/Debian yang sudah memiliki Docker. Aplikasi berjalan dalam container SvelteKit. Reverse proxy dapat memakai Caddy bawaan atau Nginx yang sudah digunakan proyek lain. Database, autentikasi, dan storage tetap menggunakan Supabase Cloud.</p>
+<h2>1. Siapkan domain dan Supabase</h2>
+<p>HTTPS wajib tersedia karena kamera dan geolocation browser tidak bekerja pada koneksi HTTP biasa.</p>
+<ol>
+<li><p>Tentukan satu domain, misalnya <code>presensi.perusahaan.com</code>.</p>
+</li>
+<li><p>Di pengelola DNS, buat <strong>A record</strong>:</p>
+<ul>
+<li>Name/Host: <code>presensi</code></li>
+<li>Value: IP publik VPS</li>
+<li>TTL: 300 atau Auto</li>
+</ul>
+</li>
+<li><p>Tunggu propagasi, kemudian periksa dari komputer lokal:</p>
+<pre><code class="language-sh">nslookup presensi.perusahaan.com
+</code></pre>
+</li>
+<li><p>Di Supabase Dashboard buka <strong>Authentication â†’ URL Configuration</strong>:</p>
+<ul>
+<li>Site URL: <code>https://presensi.perusahaan.com</code></li>
+<li>Redirect URLs: tambahkan <code>https://presensi.perusahaan.com/**</code></li>
+</ul>
+</li>
+</ol>
+<p>Jangan meneruskan proses sampai domain menunjuk ke IP VPS. Caddy tidak dapat menerbitkan sertifikat jika DNS belum benar atau port 80/443 tertutup.</p>
+<h2>2. Masuk dan periksa VPS</h2>
+<p>Dari PowerShell komputer lokal:</p>
+<pre><code class="language-powershell">ssh -p 20231 root@217.216.146.16
+</code></pre>
+<p>Di VPS, periksa sistem dan Docker:</p>
+<pre><code class="language-sh">cat /etc/os-release
+docker --version
+docker compose version
+df -h
+free -h
+</code></pre>
+<p>Jika <code>docker compose</code> belum tersedia tetapi Docker sudah ada, pada Ubuntu/Debian pasang plugin Compose:</p>
+<pre><code class="language-sh">apt update
+apt install -y docker-compose-plugin git ufw
+</code></pre>
+<h2>3. Amankan firewall tanpa memutus SSH</h2>
+<p>Port SSH VPS ini adalah <code>20231</code>, bukan port default 22. Izinkan port tersebut <strong>sebelum</strong> mengaktifkan UFW:</p>
+<pre><code class="language-sh">ufw allow 20231/tcp comment &#39;SSH&#39;
+ufw allow 80/tcp comment &#39;HTTP for Caddy&#39;
+ufw allow 443/tcp comment &#39;HTTPS for Caddy&#39;
+ufw allow 443/udp comment &#39;HTTP3 for Caddy&#39;
+ufw enable
+ufw status verbose
+</code></pre>
+<p>Jangan membuka port aplikasi 3000 ke publik. Port itu hanya tersedia pada network internal Docker.</p>
+<h2>4. Ambil source code dari GitHub</h2>
+<p>Buat direktori aplikasi:</p>
+<pre><code class="language-sh">mkdir -p /opt/presensi
+cd /opt/presensi
+</code></pre>
+<p>Untuk repository publik:</p>
+<pre><code class="language-sh">git clone https://github.com/hafourenai/Presensi_PT_Trisula.git .
+</code></pre>
+<p>Jika repository private, gunakan deploy key agar token GitHub tidak tersimpan di command history:</p>
+<pre><code class="language-sh">ssh-keygen -t ed25519 -C &quot;presensi-vps&quot; -f /root/.ssh/presensi_deploy -N &quot;&quot;
+cat /root/.ssh/presensi_deploy.pub
+</code></pre>
+<p>Salin output public key tersebut ke GitHub repository â†’ <strong>Settings â†’ Deploy keys â†’ Add deploy key</strong>. Akses tulis tidak diperlukan. Setelah itu:</p>
+<pre><code class="language-sh">cat &gt;&gt; /root/.ssh/config &lt;&lt;&#39;EOF&#39;
+Host github-presensi
+  HostName github.com
+  User git
+  IdentityFile /root/.ssh/presensi_deploy
+  IdentitiesOnly yes
+EOF
+chmod 600 /root/.ssh/config
+ssh-keyscan github.com &gt;&gt; /root/.ssh/known_hosts
+git clone git@github-presensi:hafourenai/Presensi_PT_Trisula.git .
+</code></pre>
+<h2>5. Buat environment produksi</h2>
+<pre><code class="language-sh">cp .env.example .env
+nano .env
+</code></pre>
+<p>Isi minimal berikut dengan nilai asli dari Supabase Dashboard:</p>
+<pre><code class="language-dotenv">DOMAIN=presensi.perusahaan.com
+PUBLIC_SUPABASE_URL=https://PROJECT_REF.supabase.co
+PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_xxx
+SUPABASE_SECRET_KEY=sb_secret_xxx
+</code></pre>
+<p>Aturan penting:</p>
+<ul>
+<li><p><code>DOMAIN</code> tidak memakai <code>https://</code> dan tidak diakhiri <code>/</code>.</p>
+</li>
+<li><p>Secret Supabase tidak boleh dikirim melalui chat atau dimasukkan ke Git.</p>
+</li>
+<li><p><code>.env</code> sudah diabaikan Git dan Docker build context.</p>
+</li>
+<li><p>Batasi hak baca file:</p>
+<pre><code class="language-sh">chmod 600 .env
+</code></pre>
+</li>
+</ul>
+<h2>6. Build dan jalankan aplikasi</h2>
+<p>Jika port 80/443 masih kosong dan akan memakai Caddy bawaan:</p>
+<pre><code class="language-sh">docker compose config
+docker compose build
+docker compose --profile caddy up -d
+docker compose ps
+</code></pre>
+<p>Jika VPS sudah memiliki Nginx untuk proyek lain, jalankan aplikasi saja. Secara default aplikasi tersedia hanya di loopback host pada port 3002:</p>
+<pre><code class="language-sh">docker compose build
+docker compose up -d app
+docker compose ps
+</code></pre>
+<p>Buat virtual host Nginx <code>/etc/nginx/sites-available/presensi</code> yang meneruskan request ke <code>http://127.0.0.1:3002</code>, lalu aktifkan HTTPS dengan Certbot. Jangan membuka port 3002 melalui firewall.</p>
+<p>Build pertama dapat memerlukan beberapa menit. Pantau log:</p>
+<pre><code class="language-sh">docker compose logs -f --tail=100
+</code></pre>
+<p>Tekan <code>Ctrl+C</code> untuk keluar dari tampilan log; container tetap berjalan. Setelah status <code>app</code> menjadi healthy, buka <code>https://DOMAIN_ANDA</code> dari browser.</p>
+<p>Pemeriksaan dari VPS:</p>
+<pre><code class="language-sh">curl -I https://presensi.perusahaan.com/login
+docker stats --no-stream
+</code></pre>
+<h2>7. Menyiapkan database dan administrator pertama</h2>
+<p>Migrasi SQL pada folder <code>supabase/migrations</code> harus sudah diterapkan ke project Supabase. Ikuti <a href="./fase-1-database.md">panduan database</a>. Image produksi dibuat minimal dan tidak memuat skrip administrasi. Jika bootstrap administrator belum pernah dijalankan, lakukan dari komputer pengembangan dengan <code>.env</code> lokal sesuai panduan database, kemudian hapus variabel <code>INITIAL_ADMIN_*</code> dari environment setelah berhasil.</p>
+<h2>8. Update setiap ada commit baru</h2>
+<p>Jalankan di <code>/opt/presensi</code>:</p>
+<pre><code class="language-sh">git fetch origin
+git pull --ff-only origin main
+docker compose build
+docker compose up -d app --remove-orphans
+docker image prune -f
+docker compose ps
+</code></pre>
+<p>Periksa log setelah update:</p>
+<pre><code class="language-sh">docker compose logs --tail=100 app caddy
+</code></pre>
+<h2>9. Operasional rutin</h2>
+<p>Perintah penting:</p>
+<pre><code class="language-sh"># Status
+docker compose ps
+
+# Log aplikasi
+docker compose logs -f --tail=100 app
+
+# Restart tanpa build
+docker compose restart
+
+# Stop aplikasi
+docker compose down
+
+# Jalankan kembali
+docker compose up -d
+</code></pre>
+<p>Data persisten Caddy (termasuk sertifikat) berada di Docker volume <code>caddy_data</code>. Jangan gunakan <code>docker compose down -v</code> kecuali memang ingin menghapus volume tersebut.</p>
+<h2>10. Troubleshooting</h2>
+<h3>HTTPS tidak terbit</h3>
+<pre><code class="language-sh">docker compose logs --tail=200 caddy
+</code></pre>
+<p>Pastikan A record benar, port 80/443 tidak diblokir provider VPS, dan tidak ada service lain memakai port tersebut:</p>
+<pre><code class="language-sh">ss -lntup | grep -E &#39;:80|:443&#39;
+</code></pre>
+<h3>Container aplikasi tidak healthy</h3>
+<pre><code class="language-sh">docker compose logs --tail=200 app
+docker compose config
+</code></pre>
+<p>Penyebab umum adalah environment Supabase kosong atau salah.</p>
+<h3>Kamera/GPS tidak muncul</h3>
+<p>Pastikan halaman dibuka melalui HTTPS, izin kamera/lokasi browser diberikan, dan header <code>Permissions-Policy</code> dari Caddy tidak diubah.</p>
+<h3>Kapasitas disk menipis</h3>
+<pre><code class="language-sh">df -h
+docker system df
+docker image prune -f
+</code></pre>
+<p>Dengan 2 vCPU, RAM 4 GB, dan disk 60 GB, konfigurasi dua container ini mencukupi. Hindari menjalankan Supabase self-hosted pada VPS yang sama agar kapasitas RAM tetap aman.</p>
+<h2>11. Catatan deployment aktual PT Trisula</h2>
+<p>Deployment produksi dilakukan pada 15 November 2026 dengan hasil berikut:</p>
+<ul>
+<li>Domain: <code>presensi.trisulaprimaagung.my.id</code></li>
+<li>VPS: Ubuntu 24.04, 2 vCPU, RAM 4 GB, NVMe 60 GB</li>
+<li>Docker 29.1.3, Docker Compose 2.40.3, Git 2.43.0</li>
+<li>Nginx host sudah digunakan proyek lain pada port 80/443</li>
+<li>Port 3000 dan 3001 juga sudah digunakan; aplikasi presensi memakai <code>127.0.0.1:3002</code></li>
+<li>Sertifikat Let&#39;s Encrypt diterbitkan melalui Certbot dan diperpanjang otomatis</li>
+<li>Login administrator berhasil diuji melalui HTTPS</li>
+</ul>
+<h3>Error build Supabase</h3>
+<p>Build pertama berhenti dengan pesan <code>SUPABASE_SECRET_KEY wajib tersedia</code>. Ini bukan karena <code>.env</code> salah. Secret sengaja tidak dimasukkan ke Docker build context, tetapi client admin saat itu diinisialisasi terlalu dini. Commit <code>0449008</code> memperbaikinya dengan menunda pembuatan client sampai runtime.</p>
+<pre><code class="language-sh">git pull --ff-only origin main
+docker compose build
+</code></pre>
+<h3>Konflik port Caddy dan Nginx</h3>
+<p>Caddy tidak dijalankan karena port 80 sudah dipakai Nginx proyek lain. Commit <code>710fd1b</code> menjadikan Caddy opsional dan memublikasikan aplikasi hanya ke loopback port yang dapat dikonfigurasi.</p>
+<pre><code class="language-sh">docker compose up -d app --remove-orphans
+docker compose ps
+curl -I http://127.0.0.1:3002/login
+</code></pre>
+<h3>Konfigurasi Nginx produksi</h3>
+<p>File <code>/etc/nginx/sites-available/presensi.trisulaprimaagung.my.id</code> sebelum dimodifikasi Certbot:</p>
+<pre><code class="language-nginx">server {
+    listen 80;
+    listen [::]:80;
+    server_name presensi.trisulaprimaagung.my.id;
+    client_max_body_size 10m;
+
+    location / {
+        proxy_pass http://127.0.0.1:3002;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection &quot;upgrade&quot;;
+        proxy_read_timeout 120s;
+        proxy_send_timeout 120s;
+    }
+}
+</code></pre>
+<h3>Checklist hasil akhir</h3>
+<ul>
+<li><code>docker compose ps</code> menunjukkan aplikasi <code>healthy</code>.</li>
+<li><code>curl -I http://127.0.0.1:3002/login</code> menghasilkan HTTP 200.</li>
+<li><code>nginx -t</code> berhasil sebelum reload.</li>
+<li><code>curl -I https://presensi.trisulaprimaagung.my.id/login</code> menghasilkan HTTP 200.</li>
+<li>Supabase Site URL: <code>https://presensi.trisulaprimaagung.my.id</code>.</li>
+<li>Supabase Redirect URL: <code>https://presensi.trisulaprimaagung.my.id/**</code>.</li>
+<li>Jangan membuka port 3002 pada firewall; akses publik harus melalui Nginx HTTPS.</li>
+</ul>
+</article></div>
+<footer>Dokumentasi Sistem Presensi PT Trisula · Tidak memuat secret atau kredensial produksi</footer>
+<script>document.querySelectorAll('article h2,article h3').forEach((heading)=>{heading.id=heading.textContent.toLowerCase().normalize('NFKD').replace(/[^a-z0-9\s-]/g,'').trim().replace(/\s+/g,'-')})</script>
+</body></html>
