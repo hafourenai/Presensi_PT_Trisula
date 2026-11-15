@@ -28,7 +28,7 @@
 <pre><code class="language-sh">nslookup presensi.perusahaan.com
 </code></pre>
 </li>
-<li><p>Di Supabase Dashboard buka <strong>Authentication â†’ URL Configuration</strong>:</p>
+<li><p>Di Supabase Dashboard buka <strong>Authentication → URL Configuration</strong>:</p>
 <ul>
 <li>Site URL: <code>https://presensi.perusahaan.com</code></li>
 <li>Redirect URLs: tambahkan <code>https://presensi.perusahaan.com/**</code></li>
@@ -73,7 +73,7 @@ cd /opt/presensi
 <pre><code class="language-sh">ssh-keygen -t ed25519 -C &quot;presensi-vps&quot; -f /root/.ssh/presensi_deploy -N &quot;&quot;
 cat /root/.ssh/presensi_deploy.pub
 </code></pre>
-<p>Salin output public key tersebut ke GitHub repository â†’ <strong>Settings â†’ Deploy keys â†’ Add deploy key</strong>. Akses tulis tidak diperlukan. Setelah itu:</p>
+<p>Salin output public key tersebut ke GitHub repository → <strong>Settings → Deploy keys → Add deploy key</strong>. Akses tulis tidak diperlukan. Setelah itu:</p>
 <pre><code class="language-sh">cat &gt;&gt; /root/.ssh/config &lt;&lt;&#39;EOF&#39;
 Host github-presensi
   HostName github.com
