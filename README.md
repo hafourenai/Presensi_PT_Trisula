@@ -4,9 +4,7 @@ Aplikasi presensi internal perusahaan sesuai [PRD.md](./PRD.md). Antarmuka berba
 
 ## Status
 
-Fondasi lokal Fase 0 sudah dibuat: SvelteKit 2 + Svelte 5 (JavaScript), Tailwind CSS 4, adapter Vercel, halaman awal, dan template environment.
-
-Koneksi proyek Supabase melalui `.env` sudah berhasil diverifikasi. Repository GitHub dan deployment HTTPS belum terverifikasi.
+Aplikasi menggunakan SvelteKit 2 + Svelte 5, Tailwind CSS 4, Supabase Cloud, dan adapter Node. Deployment produksi tersedia melalui Docker Compose dengan Caddy sebagai reverse proxy dan pengelola HTTPS otomatis.
 
 **Fase 1:** migrasi database/RLS/storage, seed departemen, skrip bootstrap administrator, dan tes lokal sudah tersedia. Penerapan SQL dan pembuatan administrator di Supabase cloud masih menunggu langkah pengguna pada [panduan Fase 1](./docs/fase-1-database.md). Autentikasi dan fitur presensi belum diimplementasikan.
 
@@ -29,7 +27,7 @@ npm run build
 npm run preview
 ```
 
-`check` memeriksa JavaScript/JSDoc dan komponen Svelte. Paket TypeScript hanya digunakan sebagai alat pemeriksaan; kode aplikasi menggunakan JavaScript. `build` menghasilkan output Vercel di `.vercel/output`. `preview` untuk memeriksa hasil build lokal.
+`check` memeriksa JavaScript/JSDoc dan komponen Svelte. Paket TypeScript hanya digunakan sebagai alat pemeriksaan; kode aplikasi menggunakan JavaScript. `build` menghasilkan server Node di direktori `build`. `preview` untuk memeriksa hasil build lokal.
 
 ## Mendapatkan environment Supabase
 
@@ -63,21 +61,9 @@ GitHub CLI belum tersedia pada lingkungan setup ini. Untuk menyiapkan repository
 
 Jika Anda menggunakan alur Git lain, unggah isi folder proyek sebagai root repository (file `package.json` berada di root).
 
-## Deployment Vercel
+## Deployment VPS
 
-**Catatan biaya:** [Vercel Hobby](https://vercel.com/docs/plans/hobby) dibatasi untuk penggunaan pribadi nonkomersial. Target PRD berupa aplikasi operasional perusahaan dengan biaya hosting Rp0 belum cocok dengan batasan ini. Tentukan paket hosting yang sesuai sebelum penggunaan produksi; setup lokal tetap bisa dijalankan gratis.
-
-1. Login di <https://vercel.com> memakai akun GitHub Anda.
-2. Pilih **Add New → Project**, lalu impor repository proyek.
-3. Pilih framework **SvelteKit**, root directory folder yang berisi `package.json`, Node.js **22.x**. Gunakan build command `npm run build`, install command `npm ci`, dan output directory bawaan framework.
-4. Tambahkan tiga environment variable seperti pada `.env` melalui bagian **Environment Variables**. Pilih target Production dan Preview sesuai kebutuhan. Secret key tetap tanpa prefix `PUBLIC_`.
-5. Klik **Deploy**. Buka URL HTTPS yang diberikan dan pastikan halaman “Tempat mencatat hari kerja Anda.” tampil.
-6. Setelah environment diubah pada deployment yang sudah ada, lakukan **Redeploy** agar perubahan diterapkan.
-7. Simpan URL produksi untuk konfigurasi Supabase Auth pada Fase 2.
-
-Adapter menggunakan runtime Node.js 22 dan region Singapore (`sin1`). Halaman awal belum mengakses Supabase, sehingga tampilnya halaman belum membuktikan koneksi database atau autentikasi.
-
-Halaman awal diprerender karena isinya statis. Saat route server ditambahkan di fase berikutnya, adapter Vercel membuat symlink untuk fungsi server. Jika build di Windows gagal dengan `EPERM ... symlink`, aktifkan **Developer Mode** pada pengaturan Windows atau jalankan build di lingkungan Linux/Vercel. Jangan mengganti route autentikasi menjadi statis untuk menghindari error tersebut.
+Deployment produksi menggunakan image Node.js 22, Docker Compose, dan Caddy. VPS hanya perlu Docker, Docker Compose, Git, domain yang sudah mengarah ke VPS, dan port 80/443 terbuka. Ikuti [panduan deployment VPS lengkap](./docs/deployment-vps.md).
 
 ## Pemeriksaan Fase 0
 

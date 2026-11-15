@@ -1,6 +1,9 @@
 import { createClient } from '@supabase/supabase-js';
-import { PUBLIC_SUPABASE_URL } from '$env/static/public';
-import { SUPABASE_SECRET_KEY } from '$env/static/private';
+import { env as publicEnv } from '$env/dynamic/public';
+import { env as privateEnv } from '$env/dynamic/private';
+
+const { PUBLIC_SUPABASE_URL } = publicEnv;
+const { SUPABASE_SECRET_KEY } = privateEnv;
 
 if (!SUPABASE_SECRET_KEY) {
   throw new Error('SUPABASE_SECRET_KEY wajib tersedia untuk server admin client.');

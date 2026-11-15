@@ -1,0 +1,13 @@
+.git
+.github
+.svelte-kit
+.vercel
+build
+node_modules
+.env
+.env.*
+!.env.example
+*.log
+coverage
+design
+Referensi UI Sistem Presensi (Karyawan & Admin).html
