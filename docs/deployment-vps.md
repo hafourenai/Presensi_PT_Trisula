@@ -9,7 +9,7 @@ HTTPS wajib tersedia karena kamera dan geolocation browser tidak bekerja pada ko
 1. Tentukan satu domain, misalnya `presensi.perusahaan.com`.
 2. Di pengelola DNS, buat **A record**:
    - Name/Host: `presensi`
-   - Value: IP publik VPS
+   - Value: alamat IP VPS Anda
    - TTL: 300 atau Auto
 3. Tunggu propagasi, kemudian periksa dari komputer lokal:
 
@@ -28,7 +28,7 @@ Jangan meneruskan proses sampai domain menunjuk ke IP VPS. Caddy tidak dapat men
 Dari PowerShell komputer lokal:
 
 ```powershell
-ssh -p 20231 root@217.216.146.16
+ssh -p PORT_SSH USER_VPS@IP_VPS
 ```
 
 Di VPS, periksa sistem dan Docker:
@@ -50,10 +50,10 @@ apt install -y docker-compose-plugin git ufw
 
 ## 3. Amankan firewall tanpa memutus SSH
 
-Port SSH VPS ini adalah `20231`, bukan port default 22. Izinkan port tersebut **sebelum** mengaktifkan UFW:
+Gunakan port SSH sesuai panel provider. Izinkan port internal SSH yang benar **sebelum** mengaktifkan UFW:
 
 ```sh
-ufw allow 20231/tcp comment 'SSH'
+ufw allow PORT_SSH_INTERNAL/tcp comment 'SSH'
 ufw allow 80/tcp comment 'HTTP for Caddy'
 ufw allow 443/tcp comment 'HTTPS for Caddy'
 ufw allow 443/udp comment 'HTTP3 for Caddy'
