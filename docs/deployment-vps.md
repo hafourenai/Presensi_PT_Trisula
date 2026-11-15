@@ -129,12 +129,24 @@ Aturan penting:
 
 ## 6. Build dan jalankan aplikasi
 
+Jika port 80/443 masih kosong dan akan memakai Caddy bawaan:
+
 ```sh
 docker compose config
 docker compose build
-docker compose up -d
+docker compose --profile caddy up -d
 docker compose ps
 ```
+
+Jika VPS sudah memiliki Nginx untuk proyek lain, jalankan aplikasi saja. Secara default aplikasi tersedia hanya di loopback host pada port 3002:
+
+```sh
+docker compose build
+docker compose up -d app
+docker compose ps
+```
+
+Buat virtual host Nginx `/etc/nginx/sites-available/presensi` yang meneruskan request ke `http://127.0.0.1:3002`, lalu aktifkan HTTPS dengan Certbot. Jangan membuka port 3002 melalui firewall.
 
 Build pertama dapat memerlukan beberapa menit. Pantau log:
 
@@ -163,7 +175,7 @@ Jalankan di `/opt/presensi`:
 git fetch origin
 git pull --ff-only origin main
 docker compose build
-docker compose up -d --remove-orphans
+docker compose up -d app --remove-orphans
 docker image prune -f
 docker compose ps
 ```
