@@ -97,34 +97,38 @@
               </td>
               <td class="py-3.5 text-right whitespace-nowrap">
                 <div class="inline-flex items-center gap-2">
-                  <form method="POST" action="?/updateRole" use:enhance class="inline-flex items-center gap-1.5">
-                    <input type="hidden" name="targetId" value={acc.id} />
-                    <select
-                      name="newRole"
-                      class="rounded-lg border border-slate-200 bg-white px-2 py-1 text-[11px] text-slate-700"
-                    >
-                      <option value="karyawan" selected={acc.role === 'karyawan'}>Karyawan</option>
-                      <option value="admin_hr" selected={acc.role === 'admin_hr'}>Admin HR</option>
-                    </select>
-                    <button
-                      type="submit"
-                      class="rounded-lg bg-slate-900 px-2.5 py-1 text-[11px] font-semibold text-white hover:bg-slate-800"
-                    >
-                      Simpan
-                    </button>
-                  </form>
+                  {#if acc.role === 'administrator'}
+                    <span class="text-[11px] font-medium text-slate-500">Dikelola melalui CLI rotasi</span>
+                  {:else}
+                    <form method="POST" action="?/updateRole" use:enhance class="inline-flex items-center gap-1.5">
+                      <input type="hidden" name="targetId" value={acc.id} />
+                      <select
+                        name="newRole"
+                        class="rounded-lg border border-slate-200 bg-white px-2 py-1 text-[11px] text-slate-700"
+                      >
+                        <option value="karyawan" selected={acc.role === 'karyawan'}>Karyawan</option>
+                        <option value="admin_hr" selected={acc.role === 'admin_hr'}>Admin HR</option>
+                      </select>
+                      <button
+                        type="submit"
+                        class="rounded-lg bg-slate-900 px-2.5 py-1 text-[11px] font-semibold text-white hover:bg-slate-800"
+                      >
+                        Simpan
+                      </button>
+                    </form>
 
-                  <button
-                    type="button"
-                    onclick={() => {
-                      targetDeleteAccount = acc;
-                      deleteNipInput = '';
-                    }}
-                    title="Hapus Akun Permanen"
-                    class="rounded-lg border border-red-200 p-1.5 text-red-600 hover:bg-red-50"
-                  >
-                    <Trash2 class="h-3.5 w-3.5" />
-                  </button>
+                    <button
+                      type="button"
+                      onclick={() => {
+                        targetDeleteAccount = acc;
+                        deleteNipInput = '';
+                      }}
+                      title="Hapus Akun Permanen"
+                      class="rounded-lg border border-red-200 p-1.5 text-red-600 hover:bg-red-50"
+                    >
+                      <Trash2 class="h-3.5 w-3.5" />
+                    </button>
+                  {/if}
                 </div>
               </td>
             </tr>
