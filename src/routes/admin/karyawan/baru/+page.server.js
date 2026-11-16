@@ -16,7 +16,7 @@ export const load = async () => {
 export const actions = {
   default: async ({ request, locals }) => {
     const { user, profile: actor } = await locals.safeGetSession();
-    if (!user || !actor || !['administrator', 'hr'].includes(actor.role)) {
+    if (!user || !actor || !['administrator', 'admin_hr'].includes(actor.role)) {
       return fail(403, { error: 'Akses ditolak.' });
     }
 
@@ -37,9 +37,8 @@ export const actions = {
       return fail(400, { error: 'Semua field bertanda bintang wajib diisi.' });
     }
 
-    // Role HR tidak boleh membuat akun administrator
-    if (role === 'administrator' && actor.role !== 'administrator') {
-      return fail(403, { error: 'Hanya Administrator yang dapat membuat akun Administrator.' });
+    if (!['admin_hr', 'karyawan'].includes(role)) {
+      return fail(400, { error: 'Role akun tidak valid. Administrator hanya dapat ditetapkan melalui rotasi CLI.' });
     }
 
     // Buat akun di Supabase Auth

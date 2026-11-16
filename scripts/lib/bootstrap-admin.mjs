@@ -24,7 +24,7 @@ export async function bootstrapAdmin(env, request) {
   }
   const admins = await request('/rest/v1/profiles?select=id&role=eq.administrator&limit=1');
   if (!admins.ok) throw new Error('Tidak dapat memeriksa administrator yang sudah ada.');
-  if (admins.data?.length) throw new Error('Administrator sudah ada. Gunakan panel pengelolaan akun untuk administrator tambahan.');
+  if (admins.data?.length) throw new Error('Administrator sudah ada. Gunakan perintah rotasi administrator untuk menggantinya.');
 
   const created = await request('/auth/v1/admin/users', {
     method: 'POST',

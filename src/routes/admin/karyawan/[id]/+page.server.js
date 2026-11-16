@@ -45,7 +45,7 @@ export const load = async ({ params, url }) => {
 export const actions = {
   updateStatus: async ({ params, request, locals }) => {
     const { user, profile: actor } = await locals.safeGetSession();
-    if (!user || !actor || !['administrator', 'hr'].includes(actor.role)) {
+    if (!user || !actor || !['administrator', 'admin_hr'].includes(actor.role)) {
       return fail(403, { error: 'Akses ditolak.' });
     }
 
@@ -55,7 +55,7 @@ export const actions = {
 
     // Cek target
     const { data: target } = await supabaseAdmin.from('profiles').select('role').eq('id', id).single();
-    if (target?.role === 'administrator' && actor.role !== 'administrator') {
+    if (target?.role === 'administrator') {
       return fail(403, { error: 'Anda tidak dapat mengubah akun Administrator.' });
     }
 
@@ -80,7 +80,7 @@ export const actions = {
 
   resetPassword: async ({ params, request, locals }) => {
     const { user, profile: actor } = await locals.safeGetSession();
-    if (!user || !actor || !['administrator', 'hr'].includes(actor.role)) {
+    if (!user || !actor || !['administrator', 'admin_hr'].includes(actor.role)) {
       return fail(403, { error: 'Akses ditolak.' });
     }
 
@@ -93,7 +93,7 @@ export const actions = {
     }
 
     const { data: target } = await supabaseAdmin.from('profiles').select('role').eq('id', id).single();
-    if (target?.role === 'administrator' && actor.role !== 'administrator') {
+    if (target?.role === 'administrator') {
       return fail(403, { errorReset: 'Anda tidak dapat mereset password akun Administrator.' });
     }
 
@@ -123,7 +123,7 @@ export const actions = {
 
   updateLocation: async ({ params, request, locals }) => {
     const { user, profile: actor } = await locals.safeGetSession();
-    if (!user || !actor || !['administrator', 'hr'].includes(actor.role)) {
+    if (!user || !actor || !['administrator', 'admin_hr'].includes(actor.role)) {
       return fail(403, { errorLocation: 'Akses ditolak.' });
     }
 
@@ -185,6 +185,10 @@ export const actions = {
 
     if (!targetProfile) {
       return fail(404, { errorDelete: 'Data karyawan tidak ditemukan.' });
+    }
+
+    if (targetProfile.role === 'administrator') {
+      return fail(403, { errorDelete: 'Akun Administrator hanya dapat diubah melalui rotasi CLI.' });
     }
 
     // 1. Bersihkan file foto di storage bucket attendance-photos dan avatars jika ada

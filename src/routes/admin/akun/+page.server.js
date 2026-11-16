@@ -22,13 +22,22 @@ export const actions = {
     const targetId = String(formData.get('targetId') || '');
     const newRole = String(formData.get('newRole') || '');
 
-    if (!targetId || !newRole) {
+    if (!targetId || !['admin_hr', 'karyawan'].includes(newRole)) {
       return fail(400, { error: 'Data tidak lengkap.' });
     }
 
-    // Jangan ubah role diri sendiri jika itu administrator tunggal
-    if (targetId === user.id && newRole !== 'administrator') {
-      return fail(400, { error: 'Anda tidak dapat menurunkan role akun sendiri.' });
+    const { data: targetProfile } = await supabaseAdmin
+      .from('profiles')
+      .select('role')
+      .eq('id', targetId)
+      .single();
+
+    if (!targetProfile) {
+      return fail(404, { error: 'Akun tidak ditemukan.' });
+    }
+
+    if (targetProfile.role === 'administrator') {
+      return fail(403, { error: 'Akun Administrator hanya dapat diubah melalui rotasi CLI.' });
     }
 
     const { error: updErr } = await supabaseAdmin
@@ -76,6 +85,10 @@ export const actions = {
 
     if (!targetProfile) {
       return fail(404, { error: 'Akun tidak ditemukan.' });
+    }
+
+    if (targetProfile.role === 'administrator') {
+      return fail(403, { error: 'Akun Administrator hanya dapat diubah melalui rotasi CLI.' });
     }
 
     // Bersihkan file storage foto presensi & avatar

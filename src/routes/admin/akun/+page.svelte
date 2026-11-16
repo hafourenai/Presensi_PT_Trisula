@@ -104,8 +104,7 @@
                       class="rounded-lg border border-slate-200 bg-white px-2 py-1 text-[11px] text-slate-700"
                     >
                       <option value="karyawan" selected={acc.role === 'karyawan'}>Karyawan</option>
-                      <option value="hr" selected={acc.role === 'hr'}>HR</option>
-                      <option value="administrator" selected={acc.role === 'administrator'}>Administrator</option>
+                      <option value="admin_hr" selected={acc.role === 'admin_hr'}>Admin HR</option>
                     </select>
                     <button
                       type="submit"
