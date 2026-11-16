@@ -22,10 +22,21 @@ test('Role normalization and single-administrator database invariants', async (t
     create table public.profiles (
       id uuid primary key,
       role public.user_role not null,
-      is_active boolean not null default true
+      is_active boolean not null default true,
+      must_change_password boolean not null default false,
+      updated_at timestamptz not null default now()
     );
     create table public.attendances (id uuid primary key default gen_random_uuid(), user_id uuid);
     create table public.notifications (id uuid primary key default gen_random_uuid(), target_role text);
+    create table public.audit_logs (
+      id bigint generated always as identity primary key,
+      actor_id uuid,
+      action text not null,
+      target_type text,
+      target_id text,
+      detail jsonb,
+      created_at timestamptz not null default now()
+    );
     create schema private;
     create function private.get_my_role() returns public.user_role language sql stable as $$ select null::public.user_role $$;
     create function private.get_app_role() returns public.user_role language sql stable as $$ select null::public.user_role $$;
@@ -62,4 +73,20 @@ test('Role normalization and single-administrator database invariants', async (t
     db.exec("delete from public.profiles where role='administrator'"),
     (error) => error.code === '42501'
   );
+
+  const rotationMigration = await readFile(
+    new URL('../supabase/migrations/20261116000200_atomic_administrator_rotation.sql', import.meta.url),
+    'utf8'
+  );
+  await db.exec(rotationMigration);
+  await db.exec('set role service_role');
+  await db.exec("select public.rotate_administrator('10000000-0000-4000-8000-000000000002', 'admin_hr', false)");
+  await db.exec('reset role');
+
+  const rotated = (await db.query('select id, role::text as role, is_active, must_change_password from public.profiles order by id')).rows;
+  assert.equal(rotated[0].role, 'admin_hr');
+  assert.equal(rotated[1].role, 'administrator');
+  assert.equal(rotated[1].must_change_password, true);
+  assert.equal((await db.query("select count(*)::int as count from public.profiles where role='administrator' and is_active")).rows[0].count, 1);
+  assert.equal((await db.query("select count(*)::int as count from public.audit_logs where action='rotate_administrator'")).rows[0].count, 1);
 });

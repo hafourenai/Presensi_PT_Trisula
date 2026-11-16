@@ -16,7 +16,8 @@
     "check:supabase": "node --env-file=.env scripts/check-supabase.mjs",
     "check:database": "node --env-file=.env scripts/check-database.mjs",
     "seed:admin": "node --env-file=.env scripts/seed-admin.mjs",
-    "admin:bootstrap": "node --env-file=.env scripts/seed-admin.mjs"
+    "admin:bootstrap": "node --env-file=.env scripts/seed-admin.mjs",
+    "admin:rotate": "node --env-file=.env scripts/rotate-admin.mjs"
   },
   "devDependencies": {
     "@electric-sql/pglite": "^0.5.8",
