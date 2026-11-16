@@ -1,6 +1,8 @@
 import { createServerSupabaseClient } from '$lib/server/supabase.js';
 import { supabaseAdmin } from '$lib/server/admin.js';
-import { redirect } from '@sveltejs/kit';
+import { portalConfig, portalForHost, portalUrl } from '$lib/server/domains.js';
+import { env } from '$env/dynamic/private';
+import { error, redirect } from '@sveltejs/kit';
 
 /** @type {import('@sveltejs/kit').Handle} */
 export async function handle({ event, resolve }) {
@@ -34,10 +36,28 @@ export async function handle({ event, resolve }) {
 
   const url = event.url.pathname;
 
-  const hostname = event.url.hostname;
-  const isAdminSubdomain = hostname.startsWith('admin.');
+  const domains = portalConfig(env, env.NODE_ENV);
+  const portal = portalForHost(event.url.hostname, domains);
+  if (!portal) {
+    throw error(400, 'Host tidak diizinkan.');
+  }
+
+  const isAdminSubdomain = portal === 'admin';
+  const isEmployeeDomain = portal === 'employee';
   const isKaryawanRole = profile?.role === 'karyawan';
   const isAdminRole = ['administrator', 'admin_hr'].includes(profile?.role);
+
+  if (isEmployeeDomain && url.startsWith('/admin')) {
+    throw redirect(303, portalUrl(domains.adminOrigin, url, event.url.search));
+  }
+
+  if (isAdminSubdomain && (url.startsWith('/presensi') || url.startsWith('/riwayat') || url.startsWith('/api/presensi'))) {
+    throw error(404, 'Halaman tidak ditemukan.');
+  }
+
+  if (isEmployeeDomain && url.startsWith('/api/resolve-maps')) {
+    throw error(404, 'Halaman tidak ditemukan.');
+  }
 
   // 1. Publik / Tanpa Login
   if (!user && url !== '/login') {
@@ -74,6 +94,10 @@ export async function handle({ event, resolve }) {
       // Karyawan dilarang login/akses di subdomain admin
       await event.locals.supabase.auth.signOut();
       throw redirect(303, '/login?error=unauthorized_domain');
+    }
+
+    if (isEmployeeDomain && isAdminRole) {
+      throw redirect(303, portalUrl(domains.adminOrigin, '/admin/dashboard'));
     }
 
     // Role route guards

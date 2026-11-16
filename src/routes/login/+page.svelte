@@ -1,15 +1,16 @@
 <script>
   import { enhance } from '$app/forms';
-  import { Eye, EyeOff, LogIn, ShieldAlert, Sparkles, Building2 } from '@lucide/svelte';
+  import { Eye, EyeOff, LogIn, ShieldAlert, Building2 } from '@lucide/svelte';
 
   let { form, data } = $props();
 
   let showPassword = $state(false);
   let loading = $state(false);
+  const isAdminPortal = $derived(data?.portal === 'admin');
 </script>
 
 <svelte:head>
-  <title>Masuk — Aplikasi Presensi Karyawan</title>
+  <title>Masuk — {isAdminPortal ? 'Portal Administrasi' : 'Aplikasi Presensi Karyawan'}</title>
 </svelte:head>
 
 <div class="relative flex min-h-svh flex-col justify-center bg-slate-50 px-4 py-12 selection:bg-emerald-500 selection:text-white sm:px-6 lg:px-8 font-['Plus_Jakarta_Sans',sans-serif]">
@@ -26,10 +27,10 @@
         <Building2 class="h-7 w-7" />
       </div>
       <h1 class="mt-4 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
-        Presensi Karyawan
+        {isAdminPortal ? 'Portal Administrasi' : 'Presensi Karyawan'}
       </h1>
       <p class="mt-2 text-xs text-slate-600 sm:text-sm">
-        Sistem Presensi GPS & Deteksi Wajah Internal Perusahaan
+        {isAdminPortal ? 'Backoffice Administrator dan Admin HR' : 'Sistem Presensi GPS & Deteksi Wajah Internal Perusahaan'}
       </p>
     </div>
 

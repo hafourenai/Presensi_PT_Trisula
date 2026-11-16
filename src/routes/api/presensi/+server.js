@@ -6,7 +6,7 @@ import { alertUnrecognizedDevice } from '$lib/server/notifications.js';
 
 export async function POST({ request, locals, getClientAddress }) {
   const { user, profile } = await locals.safeGetSession();
-  if (!user || !profile || !profile.is_active) {
+  if (!user || !profile || !profile.is_active || profile.role !== 'karyawan') {
     return json({ success: false, message: 'Akses tidak sah atau sesi berakhir.' }, { status: 401 });
   }
 

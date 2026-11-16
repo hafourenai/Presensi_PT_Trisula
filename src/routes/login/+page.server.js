@@ -1,8 +1,11 @@
 import { fail, redirect } from '@sveltejs/kit';
 import { createAuditLog } from '$lib/server/audit.js';
 import { supabaseAdmin } from '$lib/server/admin.js';
+import { portalConfig, portalForHost } from '$lib/server/domains.js';
+import { env } from '$env/dynamic/private';
 
 export const load = async ({ locals, url }) => {
+  const portal = portalForHost(url.hostname, portalConfig(env, env.NODE_ENV));
   const { user, profile } = await locals.safeGetSession();
   if (user && profile) {
     if (profile.must_change_password) {
@@ -19,14 +22,14 @@ export const load = async ({ locals, url }) => {
   if (errorParam === 'inactive') {
     errorMessage = 'Akun Anda telah dinonaktifkan. Silakan hubungi Administrator.';
   } else if (errorParam === 'unauthorized_domain') {
-    errorMessage = 'Portal Admin ini hanya dapat diakses oleh Administrator, Pemilik, atau HR.';
+    errorMessage = 'Akun ini tidak dapat digunakan pada portal tersebut.';
   }
 
-  return { errorMessage };
+  return { errorMessage, portal: portal === 'admin' ? 'admin' : 'employee' };
 };
 
 export const actions = {
-  default: async ({ request, locals }) => {
+  default: async ({ request, locals, url }) => {
     const formData = await request.formData();
     const identifier = String(formData.get('identifier') || '').trim();
     const password = String(formData.get('password') || '');
@@ -89,6 +92,19 @@ export const actions = {
       await locals.supabase.auth.signOut();
       return fail(403, {
         error: 'Akun Anda tidak aktif atau belum terdaftar di sistem profil.',
+        identifier
+      });
+    }
+
+    const portal = portalForHost(url.hostname, portalConfig(env, env.NODE_ENV));
+    const allowed = portal === 'admin'
+      ? ['administrator', 'admin_hr'].includes(profile.role)
+      : portal === 'development' || profile.role === 'karyawan';
+
+    if (!allowed) {
+      await locals.supabase.auth.signOut();
+      return fail(403, {
+        error: 'Akun ini tidak dapat digunakan pada portal tersebut.',
         identifier
       });
     }
