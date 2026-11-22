@@ -10,7 +10,7 @@
 </script>
 
 <svelte:head>
-  <title>Masuk — {isAdminPortal ? 'Portal Administrasi' : 'Aplikasi Presensi Karyawan'}</title>
+  <title>Masuk — {isAdminPortal ? 'Portal Admin' : 'Aplikasi Presensi Karyawan'}</title>
 </svelte:head>
 
 <div class="auth-page relative flex min-h-svh flex-col justify-center px-4 py-12 sm:px-6 lg:px-8">
@@ -22,7 +22,7 @@
         <Building2 class="h-7 w-7" />
       </div>
       <h1 class="mt-4 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
-        {isAdminPortal ? 'Portal Administrasi' : 'Presensi Karyawan'}
+        {isAdminPortal ? 'Portal Admin' : 'Presensi Karyawan'}
       </h1>
       <p class="mt-2 text-xs text-slate-600 sm:text-sm">
         {isAdminPortal ? 'Backoffice Administrator dan Admin HR' : 'Sistem Presensi GPS & Deteksi Wajah Internal Perusahaan'}

@@ -29,3 +29,12 @@ test('shared layout applies unified header and mobile navigation highlights', as
   assert.doesNotMatch(layout, /border-emerald-100/);
   assert.doesNotMatch(layout, /bg-emerald-50\/80/);
 });
+
+test('interactive cursor pointer and navigation loading indicator are configured', async () => {
+  const css = await readFile(new URL('../src/app.css', import.meta.url), 'utf8');
+  const layout = await readFile(new URL('../src/routes/+layout.svelte', import.meta.url), 'utf8');
+  assert.match(css, /button:not\(:disabled\)[\s\S]*cursor:\s*pointer;/);
+  assert.match(css, /\.nav-loading-bar/);
+  assert.match(layout, /navigating\.to/);
+  assert.match(layout, /class="nav-loading-bar"/);
+});

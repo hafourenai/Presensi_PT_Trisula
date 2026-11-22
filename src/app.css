@@ -52,6 +52,27 @@
   ::selection {
     background: #edc9a6;
   }
+
+  /* Explicit interactive cursor styling across the application */
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  a[href],
+  select:not(:disabled),
+  summary,
+  input[type="button"]:not(:disabled),
+  input[type="submit"]:not(:disabled),
+  input[type="reset"]:not(:disabled),
+  input[type="checkbox"]:not(:disabled),
+  input[type="radio"]:not(:disabled) {
+    cursor: pointer;
+  }
+
+  button:disabled,
+  [role="button"][aria-disabled="true"],
+  input:disabled,
+  select:disabled {
+    cursor: not-allowed;
+  }
 }
 
 /* Shared visual treatment for the existing utility-based pages. White text,
@@ -100,6 +121,63 @@
 .auth-page { background: var(--color-paper); }
 .auth-card { background: var(--color-surface); border: 1px solid var(--color-rule); box-shadow: var(--shadow-sm); border-radius: 14px; }
 .brand-mark { background: var(--color-brand); color: #fffaf1; border-radius: 10px; }
+
+/* Global Navigation Loading Indicator */
+.nav-loading-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #d88a54, #a94d21, #d5743c, #893c19);
+  background-size: 200% 100%;
+  animation: navProgress 1.4s ease-in-out infinite;
+  z-index: 9999;
+  box-shadow: 0 0 10px rgba(169, 77, 33, 0.45);
+}
+
+.nav-loading-spinner {
+  position: fixed;
+  top: 18px;
+  right: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-rule);
+  box-shadow: 0 4px 16px -4px rgba(88, 72, 49, 0.2);
+  border-radius: 9999px;
+  padding: 6px 14px 6px 10px;
+  z-index: 9999;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-brand);
+  pointer-events: none;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.spinner-icon {
+  width: 14px;
+  height: 14px;
+  border: 2px solid #edc9a6;
+  border-top-color: var(--color-brand);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes navProgress {
+  0% { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
 
 @media (prefers-reduced-motion: reduce) {
   .app-theme *, .app-theme *::before, .app-theme *::after {

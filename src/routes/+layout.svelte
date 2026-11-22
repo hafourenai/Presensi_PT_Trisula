@@ -1,6 +1,6 @@
 <script>
   import '../app.css';
-  import { page } from '$app/state';
+  import { page, navigating } from '$app/state';
   import {
     LayoutDashboard,
     Camera,
@@ -37,6 +37,14 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 </svelte:head>
+
+{#if navigating.to}
+  <div class="nav-loading-bar" aria-hidden="true"></div>
+  <aside class="nav-loading-spinner" aria-live="polite" aria-label="Memuat halaman...">
+    <span class="spinner-icon" aria-hidden="true"></span>
+    <span>Memuat...</span>
+  </aside>
+{/if}
 
 {#if isAuthPage || !data?.user}
   {@render children()}
