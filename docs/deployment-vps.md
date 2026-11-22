@@ -205,6 +205,12 @@ docker compose down
 
 # Jalankan kembali
 docker compose up -d
+
+# Bersihkan build cache Docker
+docker builder prune -a -f
+
+# Build ulang container dari nol tanpa cache
+docker compose build --no-cache
 ```
 
 Data persisten Caddy (termasuk sertifikat) berada di Docker volume `caddy_data`. Jangan gunakan `docker compose down -v` kecuali memang ingin menghapus volume tersebut.
