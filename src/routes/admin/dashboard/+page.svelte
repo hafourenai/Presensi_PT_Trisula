@@ -121,7 +121,7 @@
 </div>
 
 <style>
-  .attendance-dashboard { --surface: #fffcf6; --border: #e9e1d5; --muted: #736c61; --accent: #a94d21; color: #28251f; background: #f7f3ea; border-radius: 18px; padding: clamp(16px, 2.5vw, 32px); max-width: 1360px; margin: 0 auto; }
+  .attendance-dashboard { --surface: var(--color-surface); --border: var(--color-rule); --muted: var(--color-muted); --accent: var(--color-brand); color: var(--color-ink); background: var(--color-paper); border-radius: 14px; padding: clamp(16px, 2.5vw, 32px); max-width: 1360px; margin: 0 auto; }
   .dashboard-heading, .section-heading, .metric-label, .table-toolbar, .pagination, .pagination > div { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
   .dashboard-heading { flex-wrap: wrap; margin-bottom: 24px; }
   .eyebrow, .date-label { font: 10px/1.5 monospace; letter-spacing: .12em; color: var(--muted); text-transform: uppercase; }

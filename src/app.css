@@ -1,11 +1,44 @@
 @import 'tailwindcss';
 
 @theme {
-  --font-sans: 'Trebuchet MS', 'Segoe UI', sans-serif;
-  --color-paper: #f5f3ee;
-  --color-ink: #242e2b;
-  --color-muted: #5d6863;
-  --color-rule: #d1d7cf;
+  --font-sans: 'Plus Jakarta Sans', 'Segoe UI', sans-serif;
+  --color-paper: #f7f3ea;
+  --color-surface: #fffcf6;
+  --color-ink: #28251f;
+  --color-muted: #736c61;
+  --color-rule: #e9e1d5;
+  --color-brand: #a94d21;
+  --color-brand-hover: #893c19;
+  --color-brand-soft: #faecdc;
+  --color-slate-50: #f7f3ea;
+  --color-slate-100: #f1eadf;
+  --color-slate-200: #e9e1d5;
+  --color-slate-300: #d1c5b4;
+  --color-slate-400: #8f8475;
+  --color-slate-500: #736c61;
+  --color-slate-600: #625a4f;
+  --color-slate-700: #4d463b;
+  --color-slate-800: #363128;
+  --color-slate-900: #28251f;
+  --color-slate-950: #191710;
+  --color-indigo-50: #fcf2e7;
+  --color-indigo-100: #f7e6d3;
+  --color-indigo-200: #edc9a6;
+  --color-indigo-300: #e2a77a;
+  --color-indigo-400: #d88a54;
+  --color-indigo-500: #c56b35;
+  --color-indigo-600: #a94d21;
+  --color-indigo-700: #893c19;
+  --color-indigo-800: #71341d;
+  --color-indigo-900: #582a1a;
+  --radius-xl: 9px;
+  --radius-2xl: 12px;
+  --radius-3xl: 14px;
+  --shadow-xs: 0 2px 8px -6px #58483133;
+  --shadow-sm: 0 3px 12px -8px #58483133;
+  --shadow-md: 0 4px 16px -9px #58483133;
+  --shadow-lg: 0 6px 22px -12px #58483133;
+  --shadow-xl: 0 8px 28px -14px #58483133;
 }
 
 @layer base {
@@ -13,9 +46,66 @@
     margin: 0;
     background: var(--color-paper);
     color: var(--color-ink);
+    font-family: var(--font-sans);
   }
 
   ::selection {
-    background: #dae6bc;
+    background: #edc9a6;
+  }
+}
+
+/* Shared visual treatment for the existing utility-based pages. White text,
+   camera overlays and semantic success/error surfaces keep their own colors. */
+.app-theme :where(.bg-white, .bg-white\/90, .bg-white\/95) {
+  background-color: var(--color-surface);
+}
+
+.app-theme :where(.bg-gradient-to-r, .bg-gradient-to-tr, .bg-gradient-to-br) {
+  background-image: none;
+  background-color: var(--color-brand);
+  box-shadow: var(--shadow-sm);
+}
+
+.app-theme :where(button, a):where(.bg-emerald-600, .bg-teal-600, .bg-gradient-to-r) {
+  background-color: var(--color-brand);
+  box-shadow: var(--shadow-sm);
+}
+
+.app-theme :where(button, a):where(.bg-emerald-600, .bg-teal-600, .bg-gradient-to-r):hover {
+  background-color: var(--color-brand-hover);
+}
+
+.app-theme :where(input:not([type='checkbox']):not([type='radio']), select, textarea):focus {
+  border-color: var(--color-brand);
+  outline: 2px solid var(--color-brand);
+  outline-offset: 2px;
+  --tw-ring-color: transparent;
+}
+
+.app-theme :where(button, a, input[type='checkbox'], input[type='radio']):focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 3px;
+}
+
+.app-theme :where(input[type='checkbox'], input[type='radio']) {
+  accent-color: var(--color-brand);
+}
+
+.app-theme :where(thead) {
+  background-color: #f8f2e7;
+}
+
+.app-theme :where(h1) { letter-spacing: -.035em; }
+
+.auth-page { background: var(--color-paper); }
+.auth-card { background: var(--color-surface); border: 1px solid var(--color-rule); box-shadow: var(--shadow-sm); border-radius: 14px; }
+.brand-mark { background: var(--color-brand); color: #fffaf1; border-radius: 10px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .app-theme *, .app-theme *::before, .app-theme *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
   }
 }

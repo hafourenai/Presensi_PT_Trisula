@@ -248,7 +248,7 @@
     <!-- Main Content Area -->
     <div class="flex h-svh flex-1 flex-col min-w-0 overflow-hidden {isAdminOrOwner ? 'bg-slate-50/60' : 'bg-slate-50'}">
       <!-- Top Bar -->
-      <header class="flex h-16 shrink-0 items-center justify-between border-b {isAdminOrOwner ? 'border-slate-200/90 bg-white/95' : 'border-emerald-100 bg-white/90'} px-4 backdrop-blur-md sm:px-6 lg:px-8">
+      <header class="flex h-16 shrink-0 items-center justify-between border-b border-slate-200 bg-white px-4 sm:px-6 lg:px-8">
         <div class="flex items-center gap-3">
           {#if isAdminOrOwner}
             <button
@@ -275,7 +275,7 @@
               </div>
               <div>
                 <span class="text-sm font-bold text-slate-900 block leading-tight">Presensi Karyawan</span>
-                <span class="text-[10px] text-emerald-700 font-semibold tracking-wide">Portal Kehadiran</span>
+                <span class="text-[10px] text-indigo-700 font-semibold tracking-wide">Portal Kehadiran</span>
               </div>
             </div>
           {/if}
@@ -288,7 +288,7 @@
           </div>
           <a
             href="/profil"
-            class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl {isAdminOrOwner ? 'bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-100' : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-100'} font-bold text-xs transition"
+            class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-100 font-bold text-xs transition"
             title="Profil Saya"
           >
             <UserCircle class="h-5 w-5" />
@@ -317,7 +317,7 @@
         <nav class="fixed right-0 bottom-0 left-0 z-40 flex h-16 items-center justify-around border-t border-slate-200/80 bg-white/95 px-4 backdrop-blur-lg sm:hidden shadow-[0_-4px_20px_rgba(0,0,0,0.04)]">
           <a
             href="/presensi"
-            class="flex flex-col items-center gap-1 text-xs py-1 px-3 rounded-xl transition {page.url.pathname === '/presensi' ? 'font-bold text-emerald-700 bg-emerald-50/80' : 'text-slate-500 hover:text-slate-700'}"
+            class="flex flex-col items-center gap-1 text-xs py-1 px-3 rounded-xl transition {page.url.pathname === '/presensi' ? 'font-bold text-indigo-700 bg-indigo-50' : 'text-slate-500 hover:text-slate-700'}"
           >
             <Camera class="h-5 w-5" />
             <span>Presensi</span>
@@ -325,7 +325,7 @@
 
           <a
             href="/riwayat"
-            class="flex flex-col items-center gap-1 text-xs py-1 px-3 rounded-xl transition {page.url.pathname === '/riwayat' ? 'font-bold text-emerald-700 bg-emerald-50/80' : 'text-slate-500 hover:text-slate-700'}"
+            class="flex flex-col items-center gap-1 text-xs py-1 px-3 rounded-xl transition {page.url.pathname === '/riwayat' ? 'font-bold text-indigo-700 bg-indigo-50' : 'text-slate-500 hover:text-slate-700'}"
           >
             <History class="h-5 w-5" />
             <span>Riwayat</span>
@@ -333,7 +333,7 @@
 
           <a
             href="/profil"
-            class="flex flex-col items-center gap-1 text-xs py-1 px-3 rounded-xl transition {page.url.pathname === '/profil' ? 'font-bold text-emerald-700 bg-emerald-50/80' : 'text-slate-500 hover:text-slate-700'}"
+            class="flex flex-col items-center gap-1 text-xs py-1 px-3 rounded-xl transition {page.url.pathname === '/profil' ? 'font-bold text-indigo-700 bg-indigo-50' : 'text-slate-500 hover:text-slate-700'}"
           >
             <UserCircle class="h-5 w-5" />
             <span>Profil</span>

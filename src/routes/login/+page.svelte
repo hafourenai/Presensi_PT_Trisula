@@ -13,17 +13,12 @@
   <title>Masuk — {isAdminPortal ? 'Portal Administrasi' : 'Aplikasi Presensi Karyawan'}</title>
 </svelte:head>
 
-<div class="relative flex min-h-svh flex-col justify-center bg-slate-50 px-4 py-12 selection:bg-emerald-500 selection:text-white sm:px-6 lg:px-8 font-['Plus_Jakarta_Sans',sans-serif]">
-  <!-- Subtle decorative background patterns -->
-  <div class="pointer-events-none absolute inset-0 overflow-hidden">
-    <div class="absolute -top-40 -right-40 h-96 w-96 rounded-full bg-emerald-100/60 blur-3xl"></div>
-    <div class="absolute -bottom-40 -left-40 h-96 w-96 rounded-full bg-teal-100/60 blur-3xl"></div>
-  </div>
+<div class="auth-page relative flex min-h-svh flex-col justify-center px-4 py-12 sm:px-6 lg:px-8">
 
   <div class="relative mx-auto w-full max-w-md">
     <!-- Brand Header -->
     <div class="text-center">
-      <div class="mx-auto inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white shadow-lg shadow-emerald-600/20">
+      <div class="brand-mark mx-auto inline-flex h-14 w-14 items-center justify-center">
         <Building2 class="h-7 w-7" />
       </div>
       <h1 class="mt-4 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
@@ -35,7 +30,7 @@
     </div>
 
     <!-- Login Card -->
-    <div class="mt-8 rounded-3xl border border-slate-200/80 bg-white/90 p-8 shadow-xl shadow-slate-200/50 backdrop-blur-xl sm:p-10">
+    <div class="auth-card mt-8 p-6 sm:p-10">
       {#if data?.errorMessage}
         <div class="mb-6 flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50/80 p-4 text-xs sm:text-sm text-red-800">
           <ShieldAlert class="mt-0.5 h-5 w-5 shrink-0 text-red-600" />
@@ -98,7 +93,6 @@
               type="button"
               onclick={() => (showPassword = !showPassword)}
               class="absolute inset-y-0 right-0 flex items-center px-3.5 text-slate-400 hover:text-slate-600 focus:outline-none"
-              tabindex="-1"
               aria-label={showPassword ? 'Sembunyikan kata sandi' : 'Lihat kata sandi'}
             >
               {#if showPassword}
