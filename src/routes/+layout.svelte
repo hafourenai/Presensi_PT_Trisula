@@ -44,23 +44,30 @@
   <div class="flex h-svh overflow-hidden bg-slate-50 font-['Plus_Jakarta_Sans',sans-serif] text-slate-800 antialiased">
     <!-- Desktop Sidebar (Khusus Admin / Pemilik / HR) -->
     {#if isAdminOrOwner}
-      <aside class="hidden h-svh w-64 shrink-0 flex-col border-r border-slate-200/80 bg-white lg:flex">
+      <aside class="hidden h-svh w-64 shrink-0 flex-col border-r border-slate-200/90 bg-white lg:flex">
         <!-- Brand -->
         <div class="flex h-16 shrink-0 items-center gap-3 border-b border-slate-100 px-6">
-          <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white shadow-md shadow-emerald-600/20">
+          <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-tr from-indigo-700 to-indigo-500 text-white shadow-md shadow-indigo-600/20">
             <Building2 class="h-5 w-5" />
           </div>
           <div>
             <h2 class="text-sm font-bold tracking-tight text-slate-900">Admin Portal</h2>
-            <p class="text-[10px] font-bold text-emerald-600 uppercase tracking-wider">{role}</p>
+            <div class="flex items-center gap-1.5 mt-0.5">
+              <span class="inline-block h-1.5 w-1.5 rounded-full bg-indigo-600"></span>
+              <p class="text-[10px] font-bold text-indigo-700 uppercase tracking-wider">{role}</p>
+            </div>
           </div>
         </div>
 
         <!-- Navigation Links -->
         <nav class="flex-1 space-y-1.5 overflow-y-auto p-4 text-xs font-medium">
+          <div class="pb-1">
+            <p class="px-3 text-[10px] font-bold uppercase tracking-wider text-slate-400">Operasional</p>
+          </div>
+
           <a
             href="/admin/dashboard"
-            class="flex items-center gap-3 rounded-xl px-3.5 py-2.5 transition {page.url.pathname === '/admin/dashboard' ? 'bg-emerald-50 text-emerald-700 font-semibold shadow-xs' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}"
+            class="flex items-center gap-3 rounded-xl px-3.5 py-2.5 transition {page.url.pathname === '/admin/dashboard' ? 'bg-indigo-50 text-indigo-700 font-semibold shadow-xs' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}"
           >
             <LayoutDashboard class="h-4 w-4" />
             <span>Dashboard</span>
@@ -68,7 +75,7 @@
 
           <a
             href="/admin/karyawan"
-            class="flex items-center gap-3 rounded-xl px-3.5 py-2.5 transition {page.url.pathname.startsWith('/admin/karyawan') ? 'bg-emerald-50 text-emerald-700 font-semibold shadow-xs' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}"
+            class="flex items-center gap-3 rounded-xl px-3.5 py-2.5 transition {page.url.pathname.startsWith('/admin/karyawan') ? 'bg-indigo-50 text-indigo-700 font-semibold shadow-xs' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}"
           >
             <Users class="h-4 w-4" />
             <span>Kelola Karyawan</span>
@@ -76,7 +83,7 @@
 
           <a
             href="/admin/laporan"
-            class="flex items-center gap-3 rounded-xl px-3.5 py-2.5 transition {page.url.pathname.startsWith('/admin/laporan') ? 'bg-emerald-50 text-emerald-700 font-semibold shadow-xs' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}"
+            class="flex items-center gap-3 rounded-xl px-3.5 py-2.5 transition {page.url.pathname.startsWith('/admin/laporan') ? 'bg-indigo-50 text-indigo-700 font-semibold shadow-xs' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}"
           >
             <FileSpreadsheet class="h-4 w-4" />
             <span>Laporan & Rekap</span>
@@ -89,7 +96,7 @@
 
             <a
               href="/admin/akun"
-              class="flex items-center gap-3 rounded-xl px-3.5 py-2.5 transition {page.url.pathname.startsWith('/admin/akun') ? 'bg-emerald-50 text-emerald-700 font-semibold shadow-xs' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}"
+              class="flex items-center gap-3 rounded-xl px-3.5 py-2.5 transition {page.url.pathname.startsWith('/admin/akun') ? 'bg-indigo-50 text-indigo-700 font-semibold shadow-xs' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}"
             >
               <ShieldCheck class="h-4 w-4" />
               <span>Monitoring Akun</span>
@@ -97,7 +104,7 @@
 
             <a
               href="/admin/audit-log"
-              class="flex items-center gap-3 rounded-xl px-3.5 py-2.5 transition {page.url.pathname.startsWith('/admin/audit-log') ? 'bg-emerald-50 text-emerald-700 font-semibold shadow-xs' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}"
+              class="flex items-center gap-3 rounded-xl px-3.5 py-2.5 transition {page.url.pathname.startsWith('/admin/audit-log') ? 'bg-indigo-50 text-indigo-700 font-semibold shadow-xs' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}"
             >
               <FileText class="h-4 w-4" />
               <span>Audit Log</span>
@@ -105,7 +112,7 @@
 
             <a
               href="/admin/pengaturan"
-              class="flex items-center gap-3 rounded-xl px-3.5 py-2.5 transition {page.url.pathname.startsWith('/admin/pengaturan') ? 'bg-emerald-50 text-emerald-700 font-semibold shadow-xs' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}"
+              class="flex items-center gap-3 rounded-xl px-3.5 py-2.5 transition {page.url.pathname.startsWith('/admin/pengaturan') ? 'bg-indigo-50 text-indigo-700 font-semibold shadow-xs' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}"
             >
               <Settings class="h-4 w-4" />
               <span>Pengaturan Jam & GPS</span>
@@ -117,7 +124,7 @@
         <div class="shrink-0 border-t border-slate-100 p-4">
           <div class="flex items-center justify-between gap-3">
             <a href="/profil" class="flex items-center gap-2.5 truncate hover:opacity-80">
-              <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-600 font-bold text-xs uppercase">
+              <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-700 font-bold text-xs uppercase border border-indigo-100">
                 {data.profile?.full_name?.slice(0, 2) || 'AD'}
               </div>
               <div class="truncate text-left">
@@ -149,12 +156,12 @@
           <div class="relative flex w-72 max-w-xs flex-1 flex-col bg-white p-6 shadow-2xl overflow-y-auto">
             <div class="flex items-center justify-between border-b border-slate-100 pb-4 shrink-0">
               <div class="flex items-center gap-3 min-w-0">
-                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white">
+                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-tr from-indigo-700 to-indigo-500 text-white">
                   <Building2 class="h-5 w-5" />
                 </div>
                 <div class="min-w-0">
                   <h3 class="font-bold text-slate-900 text-sm truncate">Admin Portal</h3>
-                  <p class="text-[10px] text-emerald-600 font-semibold uppercase truncate">{role}</p>
+                  <p class="text-[10px] text-indigo-700 font-semibold uppercase truncate">{role}</p>
                 </div>
               </div>
               <button onclick={() => (sidebarOpen = false)} class="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 shrink-0">
@@ -163,10 +170,13 @@
             </div>
 
             <nav class="mt-4 flex-1 space-y-1 text-xs font-medium">
+              <div class="pb-1">
+                <p class="px-3 text-[10px] font-bold uppercase tracking-wider text-slate-400">Operasional</p>
+              </div>
               <a
                 href="/admin/dashboard"
                 onclick={() => (sidebarOpen = false)}
-                class="flex items-center gap-3 rounded-xl px-3.5 py-2.5 {page.url.pathname === '/admin/dashboard' ? 'bg-emerald-50 text-emerald-700 font-semibold' : 'text-slate-600'}"
+                class="flex items-center gap-3 rounded-xl px-3.5 py-2.5 {page.url.pathname === '/admin/dashboard' ? 'bg-indigo-50 text-indigo-700 font-semibold' : 'text-slate-600'}"
               >
                 <LayoutDashboard class="h-4 w-4" />
                 <span>Dashboard</span>
@@ -174,7 +184,7 @@
               <a
                 href="/admin/karyawan"
                 onclick={() => (sidebarOpen = false)}
-                class="flex items-center gap-3 rounded-xl px-3.5 py-2.5 {page.url.pathname.startsWith('/admin/karyawan') ? 'bg-emerald-50 text-emerald-700 font-semibold' : 'text-slate-600'}"
+                class="flex items-center gap-3 rounded-xl px-3.5 py-2.5 {page.url.pathname.startsWith('/admin/karyawan') ? 'bg-indigo-50 text-indigo-700 font-semibold' : 'text-slate-600'}"
               >
                 <Users class="h-4 w-4" />
                 <span>Kelola Karyawan</span>
@@ -182,7 +192,7 @@
               <a
                 href="/admin/laporan"
                 onclick={() => (sidebarOpen = false)}
-                class="flex items-center gap-3 rounded-xl px-3.5 py-2.5 {page.url.pathname.startsWith('/admin/laporan') ? 'bg-emerald-50 text-emerald-700 font-semibold' : 'text-slate-600'}"
+                class="flex items-center gap-3 rounded-xl px-3.5 py-2.5 {page.url.pathname.startsWith('/admin/laporan') ? 'bg-indigo-50 text-indigo-700 font-semibold' : 'text-slate-600'}"
               >
                 <FileSpreadsheet class="h-4 w-4" />
                 <span>Laporan & Rekap</span>
@@ -195,7 +205,7 @@
                 <a
                   href="/admin/akun"
                   onclick={() => (sidebarOpen = false)}
-                  class="flex items-center gap-3 rounded-xl px-3.5 py-2.5 {page.url.pathname.startsWith('/admin/akun') ? 'bg-emerald-50 text-emerald-700 font-semibold' : 'text-slate-600'}"
+                  class="flex items-center gap-3 rounded-xl px-3.5 py-2.5 {page.url.pathname.startsWith('/admin/akun') ? 'bg-indigo-50 text-indigo-700 font-semibold' : 'text-slate-600'}"
                 >
                   <ShieldCheck class="h-4 w-4" />
                   <span>Monitoring Akun</span>
@@ -203,7 +213,7 @@
                 <a
                   href="/admin/audit-log"
                   onclick={() => (sidebarOpen = false)}
-                  class="flex items-center gap-3 rounded-xl px-3.5 py-2.5 {page.url.pathname.startsWith('/admin/audit-log') ? 'bg-emerald-50 text-emerald-700 font-semibold' : 'text-slate-600'}"
+                  class="flex items-center gap-3 rounded-xl px-3.5 py-2.5 {page.url.pathname.startsWith('/admin/audit-log') ? 'bg-indigo-50 text-indigo-700 font-semibold' : 'text-slate-600'}"
                 >
                   <FileText class="h-4 w-4" />
                   <span>Audit Log</span>
@@ -211,7 +221,7 @@
                 <a
                   href="/admin/pengaturan"
                   onclick={() => (sidebarOpen = false)}
-                  class="flex items-center gap-3 rounded-xl px-3.5 py-2.5 {page.url.pathname.startsWith('/admin/pengaturan') ? 'bg-emerald-50 text-emerald-700 font-semibold' : 'text-slate-600'}"
+                  class="flex items-center gap-3 rounded-xl px-3.5 py-2.5 {page.url.pathname.startsWith('/admin/pengaturan') ? 'bg-indigo-50 text-indigo-700 font-semibold' : 'text-slate-600'}"
                 >
                   <Settings class="h-4 w-4" />
                   <span>Pengaturan Jam & GPS</span>
@@ -236,9 +246,9 @@
     {/if}
 
     <!-- Main Content Area -->
-    <div class="flex h-svh flex-1 flex-col min-w-0 overflow-hidden">
+    <div class="flex h-svh flex-1 flex-col min-w-0 overflow-hidden {isAdminOrOwner ? 'bg-slate-50/60' : 'bg-slate-50'}">
       <!-- Top Bar -->
-      <header class="flex h-16 shrink-0 items-center justify-between border-b border-slate-200/80 bg-white/80 px-4 backdrop-blur-md sm:px-6 lg:px-8">
+      <header class="flex h-16 shrink-0 items-center justify-between border-b {isAdminOrOwner ? 'border-slate-200/90 bg-white/95' : 'border-emerald-100 bg-white/90'} px-4 backdrop-blur-md sm:px-6 lg:px-8">
         <div class="flex items-center gap-3">
           {#if isAdminOrOwner}
             <button
@@ -248,27 +258,37 @@
             >
               <Menu class="h-5 w-5" />
             </button>
-          {/if}
-          <div class="flex items-center gap-2">
-            {#if isKaryawan}
-              <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-tr from-emerald-600 to-teal-500 text-white shadow-xs">
+            <div class="flex items-center gap-2 lg:hidden">
+              <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-white shadow-xs">
                 <Building2 class="h-4 w-4" />
               </div>
-              <span class="text-sm font-bold text-slate-900">Presensi Karyawan</span>
-            {:else}
-              <span class="text-xs font-bold uppercase tracking-wider text-slate-700 lg:hidden">Admin Portal</span>
-            {/if}
-          </div>
+              <span class="text-xs font-bold uppercase tracking-wider text-slate-800">Admin Portal</span>
+            </div>
+            <div class="hidden lg:flex items-center gap-2">
+              <span class="text-xs font-medium text-slate-400">Workspace /</span>
+              <span class="text-xs font-semibold text-slate-700 capitalize">{page.url.pathname.split('/')[2] || 'Dashboard'}</span>
+            </div>
+          {:else}
+            <div class="flex items-center gap-2.5">
+              <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white shadow-xs">
+                <Building2 class="h-4 w-4" />
+              </div>
+              <div>
+                <span class="text-sm font-bold text-slate-900 block leading-tight">Presensi Karyawan</span>
+                <span class="text-[10px] text-emerald-700 font-semibold tracking-wide">Portal Kehadiran</span>
+              </div>
+            </div>
+          {/if}
         </div>
 
         <div class="flex items-center gap-3 min-w-0">
           <div class="hidden text-right sm:block min-w-0">
             <p class="text-xs font-semibold text-slate-900 truncate max-w-[140px] md:max-w-[200px]">{data.profile?.full_name}</p>
-            <p class="text-[11px] text-slate-500 capitalize truncate">{data.profile?.role}</p>
+            <p class="text-[11px] {isAdminOrOwner ? 'text-indigo-600 font-medium' : 'text-slate-500'} capitalize truncate">{data.profile?.role}</p>
           </div>
           <a
             href="/profil"
-            class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-600 font-bold text-xs transition hover:bg-slate-200"
+            class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl {isAdminOrOwner ? 'bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-100' : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-100'} font-bold text-xs transition"
             title="Profil Saya"
           >
             <UserCircle class="h-5 w-5" />
@@ -288,16 +308,16 @@
       </header>
 
       <!-- Page Content -->
-      <main class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 {isKaryawan ? 'pb-24 sm:pb-6' : 'pb-6'}">
+      <main class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 {isKaryawan ? 'pb-24 sm:pb-8' : 'pb-8'}">
         {@render children()}
       </main>
 
-      <!-- Bottom Bar (Mobile Karyawan) -->
+      <!-- Bottom Bar (Mobile Karyawan - Thumb-Friendly Elevated Bar) -->
       {#if isKaryawan}
-        <nav class="fixed right-0 bottom-0 left-0 z-40 flex h-16 items-center justify-around border-t border-slate-200/80 bg-white/95 px-4 backdrop-blur-lg sm:hidden">
+        <nav class="fixed right-0 bottom-0 left-0 z-40 flex h-16 items-center justify-around border-t border-slate-200/80 bg-white/95 px-4 backdrop-blur-lg sm:hidden shadow-[0_-4px_20px_rgba(0,0,0,0.04)]">
           <a
             href="/presensi"
-            class="flex flex-col items-center gap-1 text-xs transition {page.url.pathname === '/presensi' ? 'font-bold text-emerald-600' : 'text-slate-400 hover:text-slate-600'}"
+            class="flex flex-col items-center gap-1 text-xs py-1 px-3 rounded-xl transition {page.url.pathname === '/presensi' ? 'font-bold text-emerald-700 bg-emerald-50/80' : 'text-slate-500 hover:text-slate-700'}"
           >
             <Camera class="h-5 w-5" />
             <span>Presensi</span>
@@ -305,7 +325,7 @@
 
           <a
             href="/riwayat"
-            class="flex flex-col items-center gap-1 text-xs transition {page.url.pathname === '/riwayat' ? 'font-bold text-emerald-600' : 'text-slate-400 hover:text-slate-600'}"
+            class="flex flex-col items-center gap-1 text-xs py-1 px-3 rounded-xl transition {page.url.pathname === '/riwayat' ? 'font-bold text-emerald-700 bg-emerald-50/80' : 'text-slate-500 hover:text-slate-700'}"
           >
             <History class="h-5 w-5" />
             <span>Riwayat</span>
@@ -313,7 +333,7 @@
 
           <a
             href="/profil"
-            class="flex flex-col items-center gap-1 text-xs transition {page.url.pathname === '/profil' ? 'font-bold text-emerald-600' : 'text-slate-400 hover:text-slate-600'}"
+            class="flex flex-col items-center gap-1 text-xs py-1 px-3 rounded-xl transition {page.url.pathname === '/profil' ? 'font-bold text-emerald-700 bg-emerald-50/80' : 'text-slate-500 hover:text-slate-700'}"
           >
             <UserCircle class="h-5 w-5" />
             <span>Profil</span>

@@ -567,7 +567,7 @@
           {/if}
           <button
             type="submit"
-            class="rounded-xl bg-emerald-600 px-5 py-2.5 text-xs font-semibold text-white hover:bg-emerald-700 shadow-xs"
+            class="rounded-xl bg-indigo-600 px-5 py-2.5 text-xs font-semibold text-white hover:bg-indigo-700 shadow-xs transition"
           >
             Terapkan Filter
           </button>

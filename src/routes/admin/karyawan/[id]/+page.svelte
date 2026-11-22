@@ -293,7 +293,7 @@
                 type="button"
                 onclick={resolveMapsLink}
                 disabled={resolvingMaps || !mapsUrlInput.trim()}
-                class="rounded-xl bg-emerald-600 px-3.5 py-2 text-xs font-semibold text-white hover:bg-emerald-700 disabled:opacity-40 whitespace-nowrap"
+                class="rounded-xl bg-indigo-600 px-3.5 py-2 text-xs font-semibold text-white hover:bg-indigo-700 disabled:opacity-40 whitespace-nowrap transition"
               >
                 {resolvingMaps ? 'Mengambil...' : 'Ambil Koordinat'}
               </button>
@@ -377,7 +377,7 @@
             </p>
             <button
               type="submit"
-              class="rounded-xl bg-emerald-600 px-4 py-2.5 text-xs font-semibold text-white shadow-xs hover:bg-emerald-700"
+              class="rounded-xl bg-indigo-600 px-4 py-2.5 text-xs font-semibold text-white shadow-xs hover:bg-indigo-700 transition"
             >
               Simpan Lokasi
             </button>

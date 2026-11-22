@@ -590,14 +590,14 @@
       <div class="mt-4 flex gap-3">
         <button
           onclick={stopCamera}
-          class="flex-1 rounded-xl border border-slate-200 py-3 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+          class="flex-1 min-h-[48px] rounded-xl border border-slate-200 py-3 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition active:scale-[0.98]"
         >
           Batal
         </button>
         <button
           onclick={capturePhoto}
           disabled={facesDetected !== 1}
-          class="flex-1 flex items-center justify-center gap-2 rounded-xl bg-emerald-600 py-3 text-xs font-semibold text-white shadow-lg shadow-emerald-600/25 hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-40"
+          class="flex-1 min-h-[48px] flex items-center justify-center gap-2 rounded-xl bg-emerald-600 py-3 text-xs font-bold text-white shadow-lg shadow-emerald-600/25 hover:bg-emerald-700 active:scale-[0.98] transition disabled:cursor-not-allowed disabled:opacity-40"
         >
           <Camera class="h-4 w-4" />
           <span>Ambil Foto</span>
@@ -615,7 +615,7 @@
           <button
             onclick={retakePhoto}
             disabled={submitting}
-            class="flex-1 flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 py-3 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+            class="flex-1 min-h-[48px] flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 py-3 text-xs font-semibold text-slate-700 hover:bg-slate-50 active:scale-[0.98] transition disabled:opacity-50"
           >
             <RotateCcw class="h-4 w-4" />
             <span>Foto Ulang</span>
@@ -623,7 +623,7 @@
           <button
             onclick={submitAttendance}
             disabled={submitting}
-            class="flex-1 flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 py-3 text-xs font-semibold text-white shadow-lg shadow-emerald-600/25 hover:from-emerald-700 hover:to-teal-700 disabled:cursor-not-allowed disabled:opacity-60"
+            class="flex-1 min-h-[48px] flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 py-3 text-xs font-bold text-white shadow-lg shadow-emerald-600/25 hover:from-emerald-700 hover:to-teal-700 active:scale-[0.98] transition disabled:cursor-not-allowed disabled:opacity-60"
           >
             {#if submitting}
               <div class="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
@@ -642,7 +642,7 @@
           <button
             onclick={() => startAttendanceFlow('in')}
             disabled={cameraLoading || !timeStatus.allowed}
-            class="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 p-5 text-sm font-bold text-white shadow-lg shadow-emerald-600/25 transition hover:from-emerald-700 hover:to-teal-700 hover:shadow-emerald-600/35 focus:ring-4 focus:ring-emerald-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
+            class="flex w-full min-h-[52px] items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 p-5 text-sm font-bold text-white shadow-lg shadow-emerald-600/25 transition hover:from-emerald-700 hover:to-teal-700 hover:shadow-emerald-600/35 active:scale-[0.99] focus:ring-4 focus:ring-emerald-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {#if cameraLoading && activeType === 'in'}
               <div class="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
@@ -659,7 +659,7 @@
           <button
             onclick={() => startAttendanceFlow('out')}
             disabled={cameraLoading || !timeStatus.allowed}
-            class="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 p-5 text-sm font-bold text-white shadow-lg shadow-blue-600/25 transition hover:from-blue-700 hover:to-indigo-700 hover:shadow-blue-600/35 focus:ring-4 focus:ring-blue-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
+            class="flex w-full min-h-[52px] items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-teal-600 to-emerald-700 p-5 text-sm font-bold text-white shadow-lg shadow-teal-600/25 transition hover:from-teal-700 hover:to-emerald-800 hover:shadow-teal-600/35 active:scale-[0.99] focus:ring-4 focus:ring-teal-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {#if cameraLoading && activeType === 'out'}
               <div class="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent"></div>

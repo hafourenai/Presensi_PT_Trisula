@@ -143,7 +143,7 @@
               type="button"
               onclick={resolveMapsLink}
               disabled={resolvingMaps || !mapsUrlInput.trim()}
-              class="rounded-xl bg-emerald-600 px-3.5 py-2 text-xs font-semibold text-white hover:bg-emerald-700 disabled:opacity-40 whitespace-nowrap"
+              class="rounded-xl bg-indigo-600 px-3.5 py-2 text-xs font-semibold text-white hover:bg-indigo-700 disabled:opacity-40 whitespace-nowrap transition"
             >
               {resolvingMaps ? 'Mengambil...' : 'Ambil Koordinat'}
             </button>
@@ -254,7 +254,7 @@
         <button
           type="submit"
           disabled={loadingHoliday}
-          class="w-full flex items-center justify-center gap-1.5 rounded-xl bg-emerald-600 py-2.5 font-semibold text-white hover:bg-emerald-700"
+          class="w-full flex items-center justify-center gap-1.5 rounded-xl bg-indigo-600 py-2.5 font-semibold text-white hover:bg-indigo-700 transition"
         >
           <Plus class="h-4 w-4" />
           <span>Tambah Hari Libur</span>
