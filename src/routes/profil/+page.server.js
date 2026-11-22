@@ -3,13 +3,7 @@ import { supabaseAdmin } from '$lib/server/admin.js';
 import { createAuditLog } from '$lib/server/audit.js';
 
 export const load = async ({ locals }) => {
-  const { user } = await locals.safeGetSession();
-
-  const { data: profile } = await supabaseAdmin
-    .from('profiles')
-    .select('*, department:departments(name)')
-    .eq('id', user.id)
-    .single();
+  const { profile } = await locals.safeGetSession();
 
   return {
     profile

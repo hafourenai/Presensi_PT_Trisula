@@ -3,8 +3,10 @@ import { fail } from '@sveltejs/kit';
 import { createAuditLog } from '$lib/server/audit.js';
 
 export const load = async () => {
-  const { data: settings } = await supabaseAdmin.from('settings').select('*').eq('id', 1).single();
-  const { data: holidays } = await supabaseAdmin.from('holidays').select('*').order('holiday_date');
+  const [{ data: settings }, { data: holidays }] = await Promise.all([
+    supabaseAdmin.from('settings').select('*').eq('id', 1).single(),
+    supabaseAdmin.from('holidays').select('*').order('holiday_date')
+  ]);
 
   return {
     settings: settings || {},

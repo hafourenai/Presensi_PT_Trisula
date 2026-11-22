@@ -8,20 +8,15 @@ export const load = async ({ locals }) => {
     timeZone: 'Asia/Jakarta'
   }).format(new Date());
 
-  // Ambil presensi hari ini
-  const { data: attendance } = await supabaseAdmin
-    .from('attendances')
-    .select('*')
-    .eq('user_id', user.id)
-    .eq('work_date', today)
-    .maybeSingle();
-
-  // Ambil pengaturan jam kerja & lokasi kantor umum
-  const { data: settings } = await supabaseAdmin
-    .from('settings')
-    .select('*')
-    .eq('id', 1)
-    .single();
+  const [{ data: attendance }, { data: settings }] = await Promise.all([
+    supabaseAdmin
+      .from('attendances')
+      .select('*')
+      .eq('user_id', user.id)
+      .eq('work_date', today)
+      .maybeSingle(),
+    supabaseAdmin.from('settings').select('*').eq('id', 1).single()
+  ]);
 
   // Tentukan lokasi target (prioritas profil khusus, fallback settings kantor)
   const office_lat = profile?.work_lat ?? (settings?.office_lat || -6.200000);

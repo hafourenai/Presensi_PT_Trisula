@@ -11,7 +11,7 @@ export async function handle({ event, resolve }) {
   /**
    * Helper aman untuk mendapatkan session & user
    */
-  event.locals.safeGetSession = async () => {
+  const readSession = async () => {
     const {
       data: { user },
       error
@@ -28,6 +28,14 @@ export async function handle({ event, resolve }) {
       .single();
 
     return { session: { user }, user, profile };
+  };
+
+  // Share in-flight verification within a navigation, never between users/requests.
+  // Actions may change auth or profile state, so retain fresh reads for mutations.
+  let sessionPromise;
+  event.locals.safeGetSession = () => {
+    if (!['GET', 'HEAD'].includes(event.request.method)) return readSession();
+    return sessionPromise ??= readSession();
   };
 
   const { user, profile } = await event.locals.safeGetSession();

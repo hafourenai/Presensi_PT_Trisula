@@ -10,15 +10,6 @@ export const load = async ({ url }) => {
   const status = url.searchParams.get('status') || '';
   const outsideOnly = url.searchParams.get('outsideOnly') === 'true';
 
-  // Daftar departemen & karyawan untuk filter dropdown
-  const [{ data: departments }, { data: employees }, { data: settings }] = await Promise.all([
-    supabaseAdmin.from('departments').select('*').order('name'),
-    supabaseAdmin.from('profiles').select('id, nip, full_name, role, department_id').order('full_name'),
-    supabaseAdmin.from('settings').select('*').eq('id', 1).single()
-  ]);
-
-  const radiusM = settings?.office_radius_m || 100;
-
   // Query Presensi
   // Gunakan inner join profiles jika memfilter departemen di query SQL
   const profileSelect = deptId
@@ -44,7 +35,13 @@ export const load = async ({ url }) => {
     query = query.eq('status', status);
   }
 
-  const { data: list } = await query;
+  const [{ data: departments }, { data: employees }, { data: settings }, { data: list }] = await Promise.all([
+    supabaseAdmin.from('departments').select('*').order('name'),
+    supabaseAdmin.from('profiles').select('id, nip, full_name, role, department_id').order('full_name'),
+    supabaseAdmin.from('settings').select('office_radius_m').eq('id', 1).single(),
+    query
+  ]);
+  const radiusM = settings?.office_radius_m || 100;
   let attendances = list || [];
 
   // Filter di luar radius (check-in atau check-out melampaui radius batas)

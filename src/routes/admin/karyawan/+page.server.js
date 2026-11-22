@@ -7,12 +7,6 @@ export const load = async ({ url }) => {
   const page = parseInt(url.searchParams.get('page') || '1', 10);
   const pageSize = 10;
 
-  // Query Departments
-  const { data: departments } = await supabaseAdmin
-    .from('departments')
-    .select('*')
-    .order('name', { ascending: true });
-
   // Query Profiles
   let query = supabaseAdmin
     .from('profiles')
@@ -32,7 +26,10 @@ export const load = async ({ url }) => {
     query = query.eq('is_active', false);
   }
 
-  const { data: employees, count } = await query;
+  const [{ data: departments }, { data: employees, count }] = await Promise.all([
+    supabaseAdmin.from('departments').select('*').order('name', { ascending: true }),
+    query
+  ]);
 
   return {
     employees: employees || [],
