@@ -1,244 +1,198 @@
 <script>
-  import {
-    Users,
-    UserCheck,
-    Clock,
-    UserX,
-    MapPinOff,
-    TrendingUp,
-    AlertCircle,
-    Calendar,
-    Building2,
-    ArrowUpRight,
-    Smartphone,
-    ShieldAlert
-  } from '@lucide/svelte';
+  import { ArrowUpRight, Search, Users, Clock, UserCheck, Calendar, MapPin, ShieldAlert, ChevronLeft, ChevronRight, Bell } from '@lucide/svelte';
 
   let { data } = $props();
-
-  function formatTime(isoString) {
-    if (!isoString) return '--:--';
-    return new Intl.DateTimeFormat('id-ID', {
-      timeZone: 'Asia/Jakarta',
-      hour: '2-digit',
-      minute: '2-digit'
-    }).format(new Date(isoString));
-  }
+  let query = $state('');
+  let status = $state('all');
+  let sort = $state('latest');
+  let page = $state(0);
+  const pageSize = 5;
+  const time = new Intl.DateTimeFormat('id-ID', { timeZone: 'Asia/Jakarta', hour: '2-digit', minute: '2-digit' });
+  const date = new Intl.DateTimeFormat('id-ID', { timeZone: 'Asia/Jakarta', dateStyle: 'long' });
+  const number = new Intl.NumberFormat('id-ID');
+  const metrics = $derived([
+    { label: 'Karyawan aktif', value: data.totalActiveEmployees, note: 'Terdaftar dalam sistem', icon: Users },
+    { label: 'Sudah hadir', value: data.summary.totalHadir, note: `${data.summary.hadirTepatWaktu} tepat waktu`, icon: UserCheck },
+    { label: 'Terlambat', value: data.summary.terlambat, note: 'Memerlukan perhatian', icon: Clock },
+    { label: 'Belum presensi', value: data.summary.belumPresensi, note: 'Menunggu check-in', icon: Calendar }
+  ]);
+  const distribution = $derived([
+    { label: 'Tepat waktu', value: data.summary.hadirTepatWaktu, color: '#37715a' },
+    { label: 'Terlambat', value: data.summary.terlambat, color: '#d5743c' },
+    { label: 'Belum presensi', value: data.summary.belumPresensi, color: '#b7ac99' },
+    { label: 'Tidak hadir', value: data.summary.tidakHadir, color: '#a34f4f' }
+  ]);
+  const distributionTotal = $derived(distribution.reduce((sum, item) => sum + item.value, 0));
+  const rows = $derived.by(() => {
+    const term = query.trim().toLocaleLowerCase('id-ID');
+    return data.recentAttendances.filter((item) => {
+      const text = `${item.profile?.full_name || ''} ${item.profile?.nip || ''} ${item.profile?.department?.name || ''}`.toLocaleLowerCase('id-ID');
+      return (!term || text.includes(term)) && (status === 'all' || item.status === status);
+    }).toSorted((a, b) => sort === 'name'
+      ? (a.profile?.full_name || '').localeCompare(b.profile?.full_name || '', 'id-ID')
+      : new Date(b.check_in_at).getTime() - new Date(a.check_in_at).getTime());
+  });
+  const pages = $derived(Math.max(1, Math.ceil(rows.length / pageSize)));
+  const currentPage = $derived(Math.min(page, pages - 1));
+  const visible = $derived(rows.slice(currentPage * pageSize, (currentPage + 1) * pageSize));
+  function resetPage() { page = 0; }
+  function initials(name = '') { return name.trim().split(/\s+/).slice(0, 2).map((part) => part[0] || '').join('').toUpperCase() || 'KY'; }
 </script>
 
-<svelte:head>
-  <title>Dashboard Admin — Presensi Karyawan</title>
-</svelte:head>
+<svelte:head><title>Dashboard Kehadiran — Presensi Karyawan</title></svelte:head>
 
-<div class="space-y-6">
-  <!-- Page Header -->
-  <div class="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+<div class="attendance-dashboard">
+  <header class="dashboard-heading">
     <div>
-      <div class="flex items-center gap-2">
-        <span class="inline-flex items-center gap-1 rounded-md bg-indigo-50 px-2 py-0.5 text-[11px] font-bold text-indigo-700 border border-indigo-150">
-          <span class="h-1.5 w-1.5 rounded-full bg-indigo-600 animate-pulse"></span>
-          Live Monitoring
-        </span>
-      </div>
-      <h1 class="mt-1.5 text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">Dashboard Kehadiran</h1>
-      <p class="mt-1 text-xs text-slate-500">
-        Pantauan presensi real-time karyawan hari ini ({new Intl.DateTimeFormat('id-ID', { dateStyle: 'full' }).format(new Date())})
-      </p>
+      <p class="eyebrow">Ringkasan operasional</p>
+      <h1>Dashboard kehadiran</h1>
+      <p class="subtitle">{date.format(new Date(`${data.today}T12:00:00+07:00`))} · Waktu Indonesia Barat</p>
     </div>
-    <a
-      href="/admin/laporan"
-      class="inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 px-4 py-2.5 text-xs font-semibold text-white shadow-xs hover:bg-indigo-700 transition"
-    >
-      <span>Lihat Laporan Lengkap</span>
-      <ArrowUpRight class="h-4 w-4" />
-    </a>
-  </div>
+    <a class="action" href="/admin/laporan">Buka laporan <ArrowUpRight size={16} /></a>
+  </header>
 
-  <!-- Metric KPI Cards -->
-  <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-    <div class="rounded-2xl border border-slate-200/90 bg-white p-4 shadow-xs hover:border-slate-300 transition">
-      <div class="flex items-center justify-between text-slate-500">
-        <span class="text-[11px] font-bold uppercase tracking-wider text-slate-600">Total Karyawan</span>
-        <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-100 text-slate-600">
-          <Users class="h-3.5 w-3.5" />
-        </div>
-      </div>
-      <p class="mt-2 text-2xl font-bold text-slate-900 tabular-nums">{data.totalActiveEmployees}</p>
-      <p class="text-[11px] text-slate-500">Aktif di sistem</p>
-    </div>
+  <section class="metrics" aria-label="Ringkasan kehadiran hari ini">
+    {#each metrics as metric}
+      <article class="panel metric">
+        <div class="metric-label"><h2>{metric.label}</h2><metric.icon size={17} strokeWidth={1.6} /></div>
+        <p class="metric-value">{number.format(metric.value)}</p>
+        <p class="muted">{metric.note}</p>
+      </article>
+    {/each}
+  </section>
 
-    <div class="rounded-2xl border border-slate-200/90 bg-white p-4 shadow-xs hover:border-emerald-200 transition">
-      <div class="flex items-center justify-between text-slate-500">
-        <span class="text-[11px] font-bold uppercase tracking-wider text-emerald-800">Tepat Waktu</span>
-        <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-50 text-emerald-700">
-          <UserCheck class="h-3.5 w-3.5" />
-        </div>
-      </div>
-      <p class="mt-2 text-2xl font-bold text-slate-900 tabular-nums">{data.summary.hadirTepatWaktu}</p>
-      <p class="text-[11px] text-emerald-700 font-medium">Orang hadir</p>
-    </div>
-
-    <div class="rounded-2xl border border-slate-200/90 bg-white p-4 shadow-xs hover:border-amber-200 transition">
-      <div class="flex items-center justify-between text-slate-500">
-        <span class="text-[11px] font-bold uppercase tracking-wider text-amber-800">Terlambat</span>
-        <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-50 text-amber-700">
-          <Clock class="h-3.5 w-3.5" />
-        </div>
-      </div>
-      <p class="mt-2 text-2xl font-bold text-slate-900 tabular-nums">{data.summary.terlambat}</p>
-      <p class="text-[11px] text-amber-700 font-medium">Orang</p>
-    </div>
-
-    <div class="rounded-2xl border border-slate-200/90 bg-white p-4 shadow-xs hover:border-slate-300 transition">
-      <div class="flex items-center justify-between text-slate-500">
-        <span class="text-[11px] font-bold uppercase tracking-wider text-slate-600">Belum Presensi</span>
-        <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-100 text-slate-500">
-          <Calendar class="h-3.5 w-3.5" />
-        </div>
-      </div>
-      <p class="mt-2 text-2xl font-bold text-slate-900 tabular-nums">{data.summary.belumPresensi}</p>
-      <p class="text-[11px] text-slate-500">Orang</p>
-    </div>
-
-    <div class="rounded-2xl border border-slate-200/90 bg-white p-4 shadow-xs hover:border-red-200 transition">
-      <div class="flex items-center justify-between text-slate-500">
-        <span class="text-[11px] font-bold uppercase tracking-wider text-red-800">Tidak Hadir</span>
-        <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-red-50 text-red-700">
-          <UserX class="h-3.5 w-3.5" />
-        </div>
-      </div>
-      <p class="mt-2 text-2xl font-bold text-slate-900 tabular-nums">{data.summary.tidakHadir}</p>
-      <p class="text-[11px] text-red-700 font-medium">Alpha/Tanpa Keterangan</p>
-    </div>
-
-    <div class="rounded-2xl border border-slate-200/90 bg-white p-4 shadow-xs hover:border-rose-200 transition">
-      <div class="flex items-center justify-between text-slate-500">
-        <span class="text-[11px] font-bold uppercase tracking-wider text-rose-800">Perangkat Asing</span>
-        <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-rose-50 text-rose-700">
-          <Smartphone class="h-3.5 w-3.5" />
-        </div>
-      </div>
-      <p class="mt-2 text-2xl font-bold text-slate-900 tabular-nums">{data.summary.perangkatTidakDikenal}</p>
-      <p class="text-[11px] text-rose-700 font-medium">Presensi Flagged</p>
-    </div>
-  </div>
-
-  {#if data.latestNotifications && data.latestNotifications.length > 0}
-    <!-- Banner Peringatan Perangkat & Audit HR -->
-    <div class="rounded-3xl border border-rose-200/80 bg-rose-50/60 p-5 shadow-xs">
-      <div class="flex items-center gap-2 font-bold text-sm text-rose-900">
-        <ShieldAlert class="h-5 w-5 text-rose-600" />
-        <span>Pemberitahuan Audit Deteksi Perangkat</span>
-      </div>
-      <div class="mt-3 space-y-2">
-        {#each data.latestNotifications as notif}
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 rounded-2xl bg-white/90 p-3 border border-rose-100 text-xs">
-            <div class="flex items-start gap-2">
-              <span class="mt-0.5 h-2 w-2 rounded-full bg-rose-500 shrink-0"></span>
-              <div>
-                <p class="font-bold text-slate-900">{notif.title}</p>
-                <p class="text-slate-600 mt-0.5">{notif.message}</p>
-              </div>
-            </div>
-            <span class="text-[10px] font-mono text-slate-400 shrink-0">
-              {new Intl.DateTimeFormat('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'Asia/Jakarta' }).format(new Date(notif.created_at))} WIB
-            </span>
-          </div>
+  <div class="overview-grid">
+    <section class="panel distribution" aria-labelledby="distribution-title">
+      <div class="section-heading"><div><h2 id="distribution-title">Kehadiran hari ini</h2><p class="muted">Distribusi status presensi yang tercatat</p></div><span class="date-label">HARI INI</span></div>
+      <div class="attendance-total"><strong>{number.format(data.summary.totalHadir)}</strong><span>karyawan sudah hadir</span></div>
+      <div class="distribution-bar" aria-hidden="true">
+        {#each distribution as item}
+          {#if item.value > 0}<span style:width={`${item.value / (distributionTotal || 1) * 100}%`} style:background={item.color}></span>{/if}
         {/each}
       </div>
-    </div>
-  {/if}
+      <ul class="distribution-legend">
+        {#each distribution as item}
+          <li><span class="legend-label"><i style:background={item.color}></i>{item.label}</span><strong>{number.format(item.value)}</strong></li>
+        {/each}
+      </ul>
+      <div class="signals"><span><MapPin size={15} /> {data.summary.diLuarRadius} di luar radius</span><span><ShieldAlert size={15} /> {data.summary.perangkatTidakDikenal} perangkat asing</span></div>
+    </section>
 
-  <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
-    <!-- 10 Presensi Terbaru Hari Ini -->
-    <div class="rounded-3xl border border-slate-200/90 bg-white p-4 shadow-xs sm:p-6 lg:col-span-2">
-      <div class="flex items-center justify-between border-b border-slate-100 pb-4">
-        <div>
-          <div class="flex items-center gap-2">
-            <h3 class="text-sm font-bold text-slate-900">Aktivitas Presensi Terbaru Hari Ini</h3>
-            <span class="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-600 tabular-nums">{data.recentAttendances.length} tercatat</span>
-          </div>
-          <p class="text-xs text-slate-500 mt-0.5">10 presensi terakhir yang diverifikasi oleh server</p>
-        </div>
-      </div>
-
-      {#if data.recentAttendances.length === 0}
-        <div class="py-12 text-center text-xs text-slate-400">
-          <Clock class="mx-auto h-8 w-8 text-slate-300" />
-          <p class="mt-2">Belum ada aktivitas presensi masuk hari ini.</p>
-        </div>
-      {:else}
-        <div class="mt-4 divide-y divide-slate-100">
-          {#each data.recentAttendances as item}
-            <div class="flex items-center justify-between gap-3 py-3 hover:bg-slate-50/50 rounded-xl px-2 transition">
-              <div class="flex items-center gap-3 min-w-0 flex-1">
-                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-indigo-50 font-bold text-xs text-indigo-700 border border-indigo-100">
-                  {item.profile?.full_name?.slice(0, 2) || 'KY'}
-                </div>
-                <div class="min-w-0 flex-1">
-                  <p class="text-xs font-bold text-slate-900 truncate">{item.profile?.full_name}</p>
-                  <p class="text-[11px] text-slate-500 truncate">{item.profile?.nip} · {item.profile?.department?.name || '-'}</p>
-                </div>
-              </div>
-
-              <div class="text-right shrink-0">
-                <div class="flex items-center justify-end gap-1.5 flex-wrap">
-                  <span class="font-mono text-xs font-bold text-slate-800 tabular-nums whitespace-nowrap">{formatTime(item.check_in_at)} WIB</span>
-                  {#if item.is_unrecognized_device}
-                    <span class="rounded-full bg-rose-50 border border-rose-200 px-2 py-0.5 text-[10px] font-bold text-rose-700 whitespace-nowrap">Perangkat Asing</span>
-                  {/if}
-                  {#if item.is_suspicious_location}
-                    <span class="rounded-full bg-red-50 border border-red-200 px-2 py-0.5 text-[10px] font-bold text-red-700 whitespace-nowrap">Fake GPS?</span>
-                  {:else if item.status === 'tepat_waktu'}
-                    <span class="rounded-full bg-emerald-50 border border-emerald-200 px-2 py-0.5 text-[10px] font-bold text-emerald-800 whitespace-nowrap">Tepat Waktu</span>
-                  {:else}
-                    <span class="rounded-full bg-amber-50 border border-amber-200 px-2 py-0.5 text-[10px] font-bold text-amber-800 whitespace-nowrap">+{item.late_minutes}m</span>
-                  {/if}
-                </div>
-                {#if item.check_in_distance_m !== null}
-                  <p class="text-[10px] text-slate-500 mt-0.5 tabular-nums">Jarak {item.check_in_distance_m}m</p>
-                {/if}
-              </div>
-            </div>
-          {/each}
-        </div>
-      {/if}
-    </div>
-
-    <!-- Karyawan Paling Sering Terlambat -->
-    <div class="rounded-3xl border border-slate-200/90 bg-white p-4 shadow-xs sm:p-6">
-      <div class="border-b border-slate-100 pb-4">
-        <h3 class="text-sm font-bold text-slate-900">Paling Sering Terlambat</h3>
-        <p class="text-xs text-slate-500 mt-0.5">Statistik monitoring bulan berjalan</p>
-      </div>
-
-      {#if data.topLateList.length === 0}
-        <div class="py-12 text-center text-xs text-slate-400">
-          <UserCheck class="mx-auto h-8 w-8 text-emerald-400" />
-          <p class="mt-2 font-medium text-emerald-800">Tidak ada keterlambatan bulan ini!</p>
-        </div>
-      {:else}
-        <div class="mt-4 space-y-3">
+    <section class="panel ranking" aria-labelledby="ranking-title">
+      <div class="section-heading"><div><h2 id="ranking-title">Keterlambatan terbanyak</h2><p class="muted">Bulan berjalan</p></div><Clock size={18} /></div>
+      {#if data.topLateList.length}
+        <ol class="ranking-list">
           {#each data.topLateList as item, index}
-            <div class="flex items-center justify-between gap-3 rounded-2xl bg-slate-50/70 p-3 border border-slate-200/70 hover:border-slate-300 transition">
-              <div class="flex items-center gap-3 min-w-0 flex-1">
-                <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-amber-100 text-[11px] font-bold text-amber-800">
-                  {index + 1}
-                </span>
-                <div class="min-w-0 flex-1">
-                  <p class="text-xs font-bold text-slate-900 truncate">{item.name}</p>
-                  <p class="text-[10px] text-slate-500 truncate">{item.nip} · {item.dept}</p>
-                </div>
-              </div>
-
-              <div class="text-right shrink-0">
-                <p class="text-xs font-bold text-amber-800 tabular-nums">{item.count}x</p>
-                <p class="text-[10px] text-slate-500 tabular-nums">{item.totalMinutes} menit</p>
-              </div>
-            </div>
+            <li><span class="rank">{index + 1}</span><div class="person"><strong>{item.name}</strong><span>{item.dept}</span></div><div class="late-count"><strong>{item.count} kali</strong><span>{item.totalMinutes} menit</span></div></li>
           {/each}
-        </div>
+        </ol>
+      {:else}
+        <div class="empty"><UserCheck size={26} /><p>Belum ada keterlambatan bulan ini.</p></div>
       {/if}
-    </div>
+    </section>
   </div>
+
+  <section class="panel activity" aria-labelledby="activity-title">
+    <div class="section-heading activity-heading"><div><h2 id="activity-title">Aktivitas presensi terbaru</h2><p class="muted">Pencarian dan filter pada 10 check-in terbaru hari ini.</p></div><a class="text-link" href="/admin/laporan">Lihat semua <ArrowUpRight size={14} /></a></div>
+    <div class="table-toolbar">
+      <label class="search"><Search size={16} /><span class="sr-only">Cari nama, NIP, atau departemen</span><input type="search" bind:value={query} oninput={resetPage} placeholder="Cari nama, NIP, departemen…" /></label>
+      <div class="filters"><label><span class="sr-only">Filter status</span><select bind:value={status} onchange={resetPage}><option value="all">Semua status</option><option value="tepat_waktu">Tepat waktu</option><option value="terlambat">Terlambat</option></select></label><label><span class="sr-only">Urutan presensi</span><select bind:value={sort} onchange={resetPage}><option value="latest">Terbaru</option><option value="name">Nama A–Z</option></select></label></div>
+    </div>
+    <div class="table-scroll">
+      <table>
+        <caption class="sr-only">Sepuluh check-in terbaru, dengan filter lokal dan lima baris per halaman</caption>
+        <thead><tr><th scope="col">Karyawan</th><th scope="col">Departemen</th><th scope="col">Status</th><th scope="col" aria-sort={sort === 'latest' ? 'descending' : 'none'}>Masuk (WIB)</th><th scope="col">Catatan</th></tr></thead>
+        <tbody>
+          {#each visible as item (item.id)}
+            <tr><td><div class="employee"><span class="avatar">{initials(item.profile?.full_name)}</span><div class="person"><strong>{item.profile?.full_name || 'Tanpa nama'}</strong><span>{item.profile?.nip || '—'}</span></div></div></td><td>{item.profile?.department?.name || '—'}</td><td><span class:late={item.status === 'terlambat'} class="status">{item.status === 'tepat_waktu' ? 'Tepat waktu' : item.status === 'terlambat' ? `Terlambat ${item.late_minutes || 0}m` : 'Tidak hadir'}</span></td><td class="numeric">{item.check_in_at ? time.format(new Date(item.check_in_at)) : '—'}</td><td><div class="flags">{#if item.is_unrecognized_device}<span>Perangkat asing</span>{/if}{#if item.is_suspicious_location}<span>Lokasi mencurigakan</span>{/if}{#if !item.is_unrecognized_device && !item.is_suspicious_location}<span class="muted">—</span>{/if}</div></td></tr>
+          {:else}
+            <tr><td colspan="5"><div class="empty"><Search size={24} /><p>{query || status !== 'all' ? 'Tidak ada presensi yang sesuai filter.' : 'Belum ada check-in hari ini.'}</p>{#if query || status !== 'all'}<button class="text-link" onclick={() => { query = ''; status = 'all'; page = 0; }}>Hapus filter</button>{/if}</div></td></tr>
+          {/each}
+        </tbody>
+      </table>
+    </div>
+    <footer class="pagination"><span aria-live="polite">{rows.length ? `${currentPage * pageSize + 1}–${Math.min(rows.length, (currentPage + 1) * pageSize)} dari ${rows.length}` : '0 hasil'}</span><div><button aria-label="Halaman sebelumnya" disabled={currentPage === 0} onclick={() => page = currentPage - 1}><ChevronLeft size={16} /></button><span>{currentPage + 1} / {pages}</span><button aria-label="Halaman berikutnya" disabled={currentPage >= pages - 1} onclick={() => page = currentPage + 1}><ChevronRight size={16} /></button></div></footer>
+  </section>
+
+  {#if data.latestNotifications.length}
+    <section class="panel notifications" aria-labelledby="notifications-title"><div class="section-heading"><h2 id="notifications-title">Pemberitahuan audit</h2><Bell size={17} /></div><ul>{#each data.latestNotifications as notification}<li><div><strong>{notification.title}</strong><p>{notification.message}</p></div><time datetime={notification.created_at}>{time.format(new Date(notification.created_at))} WIB</time></li>{/each}</ul></section>
+  {/if}
+  <p class="footnote">Data diperbarui saat halaman dimuat. Buka laporan untuk riwayat dan ekspor lengkap.</p>
 </div>
+
+<style>
+  .attendance-dashboard { --surface: #fffcf6; --border: #e9e1d5; --muted: #736c61; --accent: #a94d21; color: #28251f; background: #f7f3ea; border-radius: 18px; padding: clamp(16px, 2.5vw, 32px); max-width: 1360px; margin: 0 auto; }
+  .dashboard-heading, .section-heading, .metric-label, .table-toolbar, .pagination, .pagination > div { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+  .dashboard-heading { flex-wrap: wrap; margin-bottom: 24px; }
+  .eyebrow, .date-label { font: 10px/1.5 monospace; letter-spacing: .12em; color: var(--muted); text-transform: uppercase; }
+  h1 { font-size: clamp(23px, 3vw, 32px); letter-spacing: -.045em; font-weight: 650; margin: 4px 0 8px; }
+  h2 { font-size: 13px; font-weight: 650; }
+  .subtitle, .muted, .footnote { color: var(--muted); font-size: 12px; line-height: 1.6; }
+  .action { display: inline-flex; align-items: center; gap: 16px; background: #303028; color: #fffaf1; padding: 10px 14px; border-radius: 9px; font-size: 12px; }
+  .action:hover { background: #49483d; }
+  .metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 16px; }
+  .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; box-shadow: 0 3px 12px -8px #58483133; min-width: 0; }
+  .metric { padding: 19px; }
+  .metric-label { color: var(--muted); gap: 8px; }
+  .metric-value { font-size: 34px; font-weight: 600; line-height: 1; letter-spacing: -.04em; margin: 21px 0 10px; font-variant-numeric: tabular-nums; }
+  .overview-grid { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(280px, 1fr); gap: 16px; margin-bottom: 16px; }
+  .distribution, .ranking { padding: 22px; }
+  .section-heading .muted { margin-top: 4px; }
+  .attendance-total { display: flex; align-items: baseline; gap: 10px; margin: 26px 0 18px; }
+  .attendance-total strong { font-size: 38px; font-weight: 600; letter-spacing: -.04em; }
+  .attendance-total span { color: var(--muted); font-size: 12px; }
+  .distribution-bar { display: flex; gap: 3px; height: 24px; border-radius: 6px; overflow: hidden; background: #eee7db; }
+  .distribution-bar span { min-width: 2px; }
+  .distribution-legend { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 24px; margin-top: 24px; font-size: 12px; }
+  .distribution-legend li, .legend-label { display: flex; align-items: center; gap: 8px; }
+  .distribution-legend li { justify-content: space-between; }
+  .legend-label i { width: 8px; height: 8px; border-radius: 2px; }
+  .signals { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 25px; padding-top: 16px; border-top: 1px solid var(--border); font-size: 11px; color: var(--muted); }
+  .signals span { display: inline-flex; align-items: center; gap: 6px; }
+  .ranking-list { margin-top: 16px; }
+  .ranking-list li { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); }
+  .ranking-list li:last-child { border: 0; }
+  .rank { font: 12px monospace; color: var(--muted); }
+  .person { min-width: 0; flex: 1; }
+  .person strong, .person span, .late-count strong, .late-count span { display: block; }
+  .person strong { font-size: 12px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .person span, .late-count span { color: var(--muted); font-size: 11px; margin-top: 3px; }
+  .late-count { text-align: right; flex-shrink: 0; }
+  .late-count strong { color: var(--accent); font-size: 12px; }
+  .activity-heading { padding: 20px 22px 16px; flex-wrap: wrap; }
+  .text-link { display: inline-flex; align-items: center; gap: 6px; color: var(--accent); font-size: 12px; cursor: pointer; }
+  .text-link:hover { text-decoration: underline; }
+  .table-toolbar { padding: 0 22px 18px; flex-wrap: wrap; }
+  .search { display: flex; align-items: center; gap: 8px; border: 1px solid var(--border); border-radius: 8px; padding: 0 10px; color: var(--muted); flex: 1; max-width: 350px; min-width: 180px; }
+  input { width: 100%; min-width: 0; height: 35px; font-size: 12px; background: transparent; }
+  input:focus { outline: none; }
+  .search:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .filters { display: flex; gap: 8px; }
+  select { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; height: 35px; padding: 0 8px; font-size: 12px; }
+  .table-scroll { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; text-align: left; font-size: 12px; }
+  th { color: var(--muted); background: #f8f2e7; font: 10px/1.5 monospace; text-transform: uppercase; letter-spacing: .06em; padding: 12px 18px; white-space: nowrap; border-block: 1px solid var(--border); }
+  td { padding: 14px 18px; border-bottom: 1px solid var(--border); }
+  tbody tr:last-child td { border-bottom: 0; }
+  tbody tr:hover { background: #f8f3e9; }
+  .employee { display: flex; gap: 10px; align-items: center; min-width: 160px; }
+  .avatar { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 9px; background: #eee5d6; color: #62543c; font-size: 10px; flex-shrink: 0; }
+  .status { display: inline-block; white-space: nowrap; background: #e9f0e8; color: #365e43; padding: 4px 8px; border-radius: 5px; font-size: 11px; }
+  .status.late { background: #faecdc; color: #8c4b1c; }
+  .numeric { font-family: monospace; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .flags { display: flex; flex-direction: column; gap: 4px; color: #974b39; font-size: 11px; }
+  .empty { min-height: 150px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; color: var(--muted); font-size: 12px; text-align: center; }
+  .pagination { padding: 12px 22px; border-top: 1px solid var(--border); color: var(--muted); font: 11px monospace; }
+  .pagination > div { gap: 10px; }
+  .pagination button { padding: 5px; border: 1px solid var(--border); border-radius: 6px; cursor: pointer; }
+  .pagination button:disabled { opacity: .35; cursor: default; }
+  .notifications { margin-top: 16px; padding: 20px 22px; }
+  .notifications li { display: flex; justify-content: space-between; gap: 20px; border-top: 1px solid var(--border); padding-top: 12px; margin-top: 12px; font-size: 12px; }
+  .notifications strong { font-weight: 600; }
+  .notifications p { color: var(--muted); margin-top: 4px; }
+  .notifications time { white-space: nowrap; font: 10px monospace; color: var(--muted); }
+  .footnote { margin-top: 18px; font-size: 10px; }
+  a:focus-visible, button:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+  @media (max-width: 1000px) { .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); } .overview-grid { grid-template-columns: 1fr; } }
+  @media (max-width: 480px) { .metric { padding: 14px; } .metric-label h2 { font-size: 11px; } .metric-value { font-size: 29px; } .distribution, .ranking { padding: 16px; } .distribution-legend { gap: 12px; font-size: 11px; } .activity-heading, .table-toolbar { padding-inline: 16px; } .notifications li { flex-direction: column; gap: 6px; } .search { max-width: none; } }
+</style>
