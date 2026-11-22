@@ -89,7 +89,7 @@ export const actions = {
     if (profile.role === 'karyawan') {
       throw redirect(303, '/presensi');
     } else {
-      throw redirect(303, '/dashboard');
+      throw redirect(303, '/admin/dashboard');
     }
   }
 };

@@ -2,7 +2,7 @@ import { error, fail, redirect } from '@sveltejs/kit';
 import { supabaseAdmin } from '$lib/server/admin.js';
 import { createAuditLog } from '$lib/server/audit.js';
 
-export const load = async ({ params, url }) => {
+export const load = async ({ params }) => {
   const id = params.id;
 
   // Profil Karyawan
@@ -30,15 +30,10 @@ export const load = async ({ params, url }) => {
     .order('work_date', { ascending: false })
     .limit(10);
 
-  const isNewlyCreated = url.searchParams.get('created') === 'true';
-  const initialPwd = url.searchParams.get('pwd') || '';
-
   return {
     employee,
     departments: departments || [],
-    recentAttendances: recentAttendances || [],
-    isNewlyCreated,
-    initialPwd
+    recentAttendances: recentAttendances || []
   };
 };
 

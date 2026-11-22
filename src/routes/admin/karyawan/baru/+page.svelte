@@ -70,6 +70,14 @@
   </div>
 
   <div class="rounded-3xl border border-slate-200/80 bg-white p-4 shadow-xs sm:p-8">
+    {#if form?.created}
+      <div class="mb-6 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-xs text-emerald-900">
+        <p class="font-bold">Akun berhasil dibuat. Salin kredensial ini sekarang untuk karyawan.</p>
+        <p class="mt-2">NIP: <strong>{form.created.nip}</strong></p>
+        <p>Kata sandi awal: <strong class="font-mono">{form.created.password}</strong></p>
+        <a class="mt-2 inline-block font-semibold underline" href={`/admin/karyawan/${form.created.id}`}>Lihat detail karyawan</a>
+      </div>
+    {/if}
     {#if form?.error}
       <div class="mb-6 flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 text-xs font-semibold text-red-800">
         <ShieldAlert class="h-4 w-4 text-red-600 shrink-0" />

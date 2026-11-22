@@ -5,11 +5,8 @@
     KeyRound,
     UserCheck,
     UserX,
-    CheckCircle2,
     Clock,
     XCircle,
-    Copy,
-    Check,
     History,
     ShieldAlert,
     MapPin,
@@ -19,7 +16,6 @@
 
   let { data, form } = $props();
 
-  let copied = $state(false);
   let resetPwdInput = $state('');
   let showDeleteConfirm = $state(false);
   let deleteInputConfirm = $state('');
@@ -63,12 +59,6 @@
     }
   }
 
-  function copyToClipboard(text) {
-    navigator.clipboard.writeText(text);
-    copied = true;
-    setTimeout(() => (copied = false), 2000);
-  }
-
   function formatTime(isoString) {
     if (!isoString) return '--:--';
     return new Intl.DateTimeFormat('id-ID', {
@@ -103,39 +93,6 @@
       <p class="mt-0.5 text-xs text-slate-500">NIP: {data.employee.nip} · {data.employee.department?.name || 'Tanpa Departemen'}</p>
     </div>
   </div>
-
-  <!-- Info Akun Baru Dibuat (Flash Password) -->
-  {#if data.isNewlyCreated && data.initialPwd}
-    <div class="rounded-3xl border border-emerald-200 bg-emerald-50/80 p-6 text-emerald-900 shadow-sm">
-      <div class="flex items-center gap-2 font-bold text-sm">
-        <CheckCircle2 class="h-5 w-5 text-emerald-600" />
-        <span>Akun Karyawan Berhasil Dibuat!</span>
-      </div>
-      <p class="mt-1 text-xs text-emerald-800">
-        Berikan informasi kredensial berikut kepada karyawan. Karyawan akan diminta mengganti kata sandi saat pertama kali login.
-      </p>
-
-      <div class="mt-4 flex flex-col gap-2 rounded-2xl bg-white p-4 border border-emerald-100 sm:flex-row sm:items-center sm:justify-between">
-        <div class="text-xs">
-          <p class="text-slate-500">Username / NIP: <strong class="text-slate-900 font-mono text-sm">{data.employee.nip}</strong></p>
-          <p class="text-slate-500 mt-0.5">Kata Sandi Awal: <strong class="text-emerald-700 font-mono text-sm">{data.initialPwd}</strong></p>
-        </div>
-        <button
-          type="button"
-          onclick={() => copyToClipboard(`NIP/Username: ${data.employee.nip}\nKata Sandi: ${data.initialPwd}\nLogin di: ${window.location.origin}/login`)}
-          class="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-3.5 py-2 text-xs font-semibold text-white hover:bg-emerald-700"
-        >
-          {#if copied}
-            <Check class="h-4 w-4" />
-            <span>Tersalin!</span>
-          {:else}
-            <Copy class="h-4 w-4" />
-            <span>Salin Kredensial</span>
-          {/if}
-        </button>
-      </div>
-    </div>
-  {/if}
 
   {#if form?.successReset}
     <div class="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-xs font-semibold text-emerald-800">

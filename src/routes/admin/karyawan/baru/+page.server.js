@@ -1,6 +1,7 @@
-import { fail, redirect } from '@sveltejs/kit';
+import { fail } from '@sveltejs/kit';
 import { supabaseAdmin } from '$lib/server/admin.js';
 import { createAuditLog } from '$lib/server/audit.js';
+import { employeeLocation } from '$lib/server/employee-location.js';
 
 export const load = async () => {
   const { data: departments } = await supabaseAdmin
@@ -28,9 +29,6 @@ export const actions = {
     const department_id = String(formData.get('department_id') || '') || null;
     const position = String(formData.get('position') || '').trim() || null;
     const work_location_name = String(formData.get('work_location_name') || '').trim() || null;
-    const work_lat = formData.get('work_lat') ? parseFloat(String(formData.get('work_lat'))) : null;
-    const work_lng = formData.get('work_lng') ? parseFloat(String(formData.get('work_lng'))) : null;
-    const work_radius_m = formData.get('work_radius_m') ? parseInt(String(formData.get('work_radius_m')), 10) : null;
     const initialPassword = String(formData.get('password') || '').trim();
 
     if (!nip || !full_name || !email || !initialPassword) {
@@ -39,6 +37,13 @@ export const actions = {
 
     if (!['admin_hr', 'karyawan'].includes(role)) {
       return fail(400, { error: 'Role akun tidak valid. Administrator hanya dapat ditetapkan melalui rotasi CLI.' });
+    }
+
+    let location;
+    try {
+      location = employeeLocation(formData);
+    } catch (error) {
+      return fail(400, { error: error.message });
     }
 
     // Buat akun di Supabase Auth
@@ -64,9 +69,7 @@ export const actions = {
       department_id,
       position,
       work_location_name,
-      work_lat,
-      work_lng,
-      work_radius_m,
+      ...location,
       must_change_password: true,
       is_active: true
     });
@@ -87,6 +90,6 @@ export const actions = {
       detail: { nip, email, role }
     });
 
-    throw redirect(303, `/admin/karyawan/${createdAuth.user.id}?created=true&pwd=${encodeURIComponent(initialPassword)}`);
+    return { created: { id: createdAuth.user.id, nip, password: initialPassword } };
   }
 };
