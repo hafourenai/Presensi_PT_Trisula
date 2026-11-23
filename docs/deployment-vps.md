@@ -318,3 +318,42 @@ server {
 - Supabase Site URL: `https://presensi.trisulaprimaagung.my.id`.
 - Supabase Redirect URL: `https://presensi.trisulaprimaagung.my.id/**`.
 - Jangan membuka port 3002 pada firewall; akses publik harus melalui Nginx HTTPS.
+
+## 12. Arsitektur Hybrid Local PostgreSQL (Optimasi Latensi Jakarta)
+
+Untuk menghilangkan latensi jaringan antar-benua dari VPS Jakarta ke Supabase Sydney (~350 ms per query REST), seluruh tabel operasional (`departments`, `profiles`, `attendances`, `settings`, `holidays`, `audit_logs`, `user_devices`, `notifications`) dijalankan pada container `postgres:16-alpine` lokal di dalam jaringan internal Docker VPS, sedangkan **Supabase Cloud** tetap menangani **Authentication** dan **Object Storage** (`attendance-photos`, `avatars`).
+
+### Langkah Cutover / Update di VPS
+
+1. Tarik perubahan terbaru dan bangun ulang container (`postgres` dan `app`):
+
+   ```sh
+   git fetch origin
+   git pull --ff-only origin main
+   docker compose up -d --build postgres app
+   docker compose ps
+   ```
+
+2. Sinkronkan seluruh data operasional yang sudah ada di Supabase Cloud ke PostgreSQL lokal:
+
+   ```sh
+   docker compose exec app npm run db:sync:local
+   ```
+
+3. Verifikasi mode database aktif (`local_pg`) dan waktu eksekusi (`Server-Timing`) dari VPS:
+
+   ```sh
+   curl -sI -H "x-forwarded-host: 127.0.0.1" -H "x-forwarded-proto: http" http://127.0.0.1:3002/login | grep -i server-timing
+   ```
+
+   Header `server-timing` akan menampilkan `desc="local_pg"` dengan durasi total hanya beberapa milidetik.
+
+### Backup Harian PostgreSQL Lokal
+
+Untuk mencadangkan database operasional lokal pada VPS:
+
+```sh
+mkdir -p /opt/presensi/backups
+docker compose exec -T postgres pg_dump -U presensi -d presensi --clean --if-exists | gzip > /opt/presensi/backups/presensi-$(date +%F).sql.gz
+```
+

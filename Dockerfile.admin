@@ -1,8 +1,10 @@
 FROM node:22-alpine
 WORKDIR /tools
 
-COPY package.json ./package.json
+COPY package.json package-lock.json ./
+RUN npm ci --omit=dev
 COPY scripts ./scripts
+COPY supabase/local_schema.sql ./supabase/local_schema.sql
 
 RUN addgroup -S tools && adduser -S tools -G tools
 USER tools

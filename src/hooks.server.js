@@ -6,17 +6,21 @@ import { error, redirect } from '@sveltejs/kit';
 
 /** @type {import('@sveltejs/kit').Handle} */
 export async function handle({ event, resolve }) {
+  const reqStart = performance.now();
+  let sessionDur = 0;
   event.locals.supabase = createServerSupabaseClient(event);
 
   /**
    * Helper aman untuk mendapatkan session & user
    */
   const readSession = async () => {
+    const t0 = performance.now();
     const {
       data: { user },
       error
     } = await event.locals.supabase.auth.getUser();
     if (error || !user) {
+      sessionDur = performance.now() - t0;
       return { session: null, user: null, profile: null };
     }
 
@@ -27,6 +31,7 @@ export async function handle({ event, resolve }) {
       .eq('id', user.id)
       .single();
 
+    sessionDur = performance.now() - t0;
     return { session: { user }, user, profile };
   };
 
@@ -34,7 +39,10 @@ export async function handle({ event, resolve }) {
   // Actions may change auth or profile state, so retain fresh reads for mutations.
   let sessionPromise;
   event.locals.safeGetSession = () => {
-    if (!['GET', 'HEAD'].includes(event.request.method)) return readSession();
+    if (!['GET', 'HEAD'].includes(event.request.method)) {
+      supabaseAdmin.invalidateCache?.('profiles');
+      return readSession();
+    }
     return sessionPromise ??= readSession();
   };
 
@@ -126,9 +134,22 @@ export async function handle({ event, resolve }) {
     }
   }
 
-  return resolve(event, {
+  const response = await resolve(event, {
     filterSerializedResponseHeaders(name) {
       return name === 'content-range' || name === 'x-supabase-api-version';
     }
   });
+
+  try {
+    const totalDur = performance.now() - reqStart;
+    const dbMode = supabaseAdmin.isLocalPg ? 'local_pg' : 'cloud_rest';
+    response.headers.set(
+      'server-timing',
+      `session;dur=${sessionDur.toFixed(2)}, total;dur=${totalDur.toFixed(2)};desc="${dbMode}"`
+    );
+  } catch {
+    // Ignore immutable synthetic headers in unit tests
+  }
+
+  return response;
 }

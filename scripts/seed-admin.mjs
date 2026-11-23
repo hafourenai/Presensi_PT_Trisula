@@ -1,8 +1,13 @@
 import { bootstrapAdmin } from './lib/bootstrap-admin.mjs';
 import { request } from './lib/supabase.mjs';
+import { runFullSync } from './sync-supabase-to-local.mjs';
 
 try {
   const status = await bootstrapAdmin(process.env, request);
+  if (process.env.DATABASE_URL?.trim()) {
+    await runFullSync({ databaseUrl: process.env.DATABASE_URL, requestFn: request });
+    console.log('Profil administrator berhasil disinkronkan ke PostgreSQL lokal.');
+  }
   console.log(status === 'created'
     ? 'Administrator awal berhasil dibuat bersama profil dan audit. Wajib ganti password saat login pertama.'
     : 'Administrator awal sudah tersedia. Password dan profil tidak diubah.');

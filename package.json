@@ -17,7 +17,9 @@
     "check:database": "node --env-file=.env scripts/check-database.mjs",
     "seed:admin": "node --env-file=.env scripts/seed-admin.mjs",
     "admin:bootstrap": "node --env-file-if-exists=.env scripts/seed-admin.mjs",
-    "admin:rotate": "node --env-file-if-exists=.env scripts/rotate-admin.mjs"
+    "admin:rotate": "node --env-file-if-exists=.env scripts/rotate-admin.mjs",
+    "db:migrate:local": "node --env-file-if-exists=.env scripts/migrate-local-db.mjs",
+    "db:sync:local": "node --env-file-if-exists=.env scripts/sync-supabase-to-local.mjs"
   },
   "devDependencies": {
     "@electric-sql/pglite": "^0.5.8",
@@ -39,6 +41,7 @@
     "chart.js": "^4.5.1",
     "exceljs": "^4.4.0",
     "jspdf": "^4.2.1",
-    "jspdf-autotable": "^5.0.8"
+    "jspdf-autotable": "^5.0.8",
+    "pg": "^8.23.1"
   }
 }

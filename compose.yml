@@ -1,10 +1,46 @@
 services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    shm_size: 128mb
+    command:
+      - "postgres"
+      - "-c"
+      - "shared_buffers=128MB"
+      - "-c"
+      - "effective_cache_size=512MB"
+      - "-c"
+      - "work_mem=4MB"
+      - "-c"
+      - "maintenance_work_mem=32MB"
+      - "-c"
+      - "max_connections=30"
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-presensi}
+      POSTGRES_USER: ${POSTGRES_USER:-presensi}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-presensi_local_secret}
+      TZ: Asia/Jakarta
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./supabase/local_schema.sql:/docker-entrypoint-initdb.d/01-local-schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-presensi} -d $${POSTGRES_DB:-presensi}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - web
+
   app:
     build:
       context: .
       dockerfile: Dockerfile
     image: presensi-app:latest
     restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
     env_file:
       - .env
     environment:
@@ -14,6 +50,9 @@ services:
       PROTOCOL_HEADER: x-forwarded-proto
       HOST_HEADER: x-forwarded-host
       BODY_SIZE_LIMIT: 10M
+      DATABASE_URL: ${DATABASE_URL:-postgresql://${POSTGRES_USER:-presensi}:${POSTGRES_PASSWORD:-presensi_local_secret}@postgres:5432/${POSTGRES_DB:-presensi}}
+      AUTH_CACHE_TTL_MS: ${AUTH_CACHE_TTL_MS:-30000}
+      LOCAL_DB_CACHE_TTL_MS: ${LOCAL_DB_CACHE_TTL_MS:-10000}
     ports:
       - "127.0.0.1:${APP_PORT:-3002}:3000"
     healthcheck:
@@ -32,8 +71,13 @@ services:
       context: .
       dockerfile: Dockerfile.admin
     image: presensi-admin-tools:latest
+    depends_on:
+      postgres:
+        condition: service_healthy
     env_file:
       - .env
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-postgresql://${POSTGRES_USER:-presensi}:${POSTGRES_PASSWORD:-presensi_local_secret}@postgres:5432/${POSTGRES_DB:-presensi}}
     networks:
       - web
 
@@ -41,6 +85,7 @@ services:
     image: caddy:2.10-alpine
     profiles:
       - caddy
+      
     restart: unless-stopped
     depends_on:
       app:
@@ -63,5 +108,6 @@ networks:
   web:
 
 volumes:
+  postgres_data:
   caddy_data:
   caddy_config:
