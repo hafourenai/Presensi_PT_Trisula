@@ -1,11 +1,14 @@
 import { request } from './lib/supabase.mjs';
-import { rotateAdmin } from './lib/rotate-admin.mjs';
-import { runFullSync } from './sync-supabase-to-local.mjs';
+import { rotateAdmin, rotationInput } from './lib/rotate-admin.mjs';
+import { mirrorRotation, withLocalClient } from './lib/local-admin-sync.mjs';
 
 try {
   const result = await rotateAdmin(process.env, request);
   if (process.env.DATABASE_URL?.trim()) {
-    await runFullSync({ databaseUrl: process.env.DATABASE_URL, requestFn: request });
+    const { previousRole, deactivatePrevious } = rotationInput(process.env);
+    await withLocalClient(process.env.DATABASE_URL, (client) =>
+      mirrorRotation(client, request, { candidateId: result.candidateId, previousRole, deactivatePrevious })
+    );
     console.log('Perubahan rotasi administrator berhasil disinkronkan ke PostgreSQL lokal.');
   }
   console.log(`Rotasi administrator berhasil. Calon akun ${result.created ? 'baru dibuat' : 'yang sudah ada digunakan'}.`);

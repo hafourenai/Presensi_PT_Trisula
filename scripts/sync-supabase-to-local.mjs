@@ -15,28 +15,44 @@ export const SYNC_TABLES_ORDER = [
   'audit_logs'
 ];
 
+// Tabel tambahan yang mungkin belum dimigrasikan pada proyek Supabase lama.
+const OPTIONAL_TABLES = new Set(['user_devices', 'notifications']);
+// PGRST205: tabel tidak ada di schema cache; 42P01: relasi tidak ditemukan.
+const MISSING_TABLE_CODES = new Set(['PGRST205', '42P01']);
+
+// Urutkan berdasarkan primary key agar paginasi stabil dan tidak bergantung
+// pada kolom created_at yang tidak dimiliki semua tabel (mis. user_devices).
+export function orderColumnFor(table) {
+  return table === 'holidays' ? 'holiday_date' : 'id';
+}
+
+function describeError(res) {
+  const code = typeof res.data?.code === 'string' ? res.data.code : null;
+  const message = typeof res.data?.message === 'string' ? res.data.message.slice(0, 200) : null;
+  return [code, message].filter(Boolean).join(': ');
+}
+
 export async function fetchAllFromSupabase(table, requestFn = request) {
   const pageSize = 1000;
   let offset = 0;
   const allRows = [];
+  const orderParam = `${orderColumnFor(table)}.asc`;
 
   while (true) {
-    const orderParam =
-      table === 'holidays'
-        ? 'holiday_date.asc'
-        : table === 'settings' || table === 'departments' || table === 'audit_logs'
-          ? 'id.asc'
-          : 'created_at.asc';
-
     const res = await requestFn(
       `/rest/v1/${table}?select=*&order=${orderParam}&limit=${pageSize}&offset=${offset}`
     );
 
     if (!res.ok) {
-      if (res.status === 404 && ['user_devices', 'notifications'].includes(table)) {
+      const missingTable = res.status === 404 || MISSING_TABLE_CODES.has(res.data?.code);
+      if (missingTable && OPTIONAL_TABLES.has(table)) {
+        console.warn(`  - ${table}: tabel tidak ditemukan di Supabase Cloud, dilewati.`);
         return [];
       }
-      throw new Error(`Gagal membaca tabel ${table} dari Supabase Cloud (HTTP ${res.status})`);
+      const detail = describeError(res);
+      throw new Error(
+        `Gagal membaca tabel ${table} dari Supabase Cloud (HTTP ${res.status}${detail ? ` - ${detail}` : ''})`
+      );
     }
 
     const batch = Array.isArray(res.data) ? res.data : [];

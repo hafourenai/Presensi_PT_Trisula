@@ -1,11 +1,12 @@
-import { bootstrapAdmin } from './lib/bootstrap-admin.mjs';
+import { bootstrapAdmin, adminInput } from './lib/bootstrap-admin.mjs';
 import { request } from './lib/supabase.mjs';
-import { runFullSync } from './sync-supabase-to-local.mjs';
+import { mirrorBootstrapAdmin, withLocalClient } from './lib/local-admin-sync.mjs';
 
 try {
   const status = await bootstrapAdmin(process.env, request);
   if (process.env.DATABASE_URL?.trim()) {
-    await runFullSync({ databaseUrl: process.env.DATABASE_URL, requestFn: request });
+    const { email } = adminInput(process.env);
+    await withLocalClient(process.env.DATABASE_URL, (client) => mirrorBootstrapAdmin(client, request, email));
     console.log('Profil administrator berhasil disinkronkan ke PostgreSQL lokal.');
   }
   console.log(status === 'created'

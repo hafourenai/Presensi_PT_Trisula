@@ -340,6 +340,10 @@ Untuk menghilangkan latensi jaringan antar-benua dari VPS Jakarta ke Supabase Sy
    docker compose exec app npm run db:sync:local
    ```
 
+   Jalankan perintah ini di dalam container, bukan di host VPS (host tidak memiliki `node_modules` dengan paket `pg`). Pesan `.env not found. Continuing without it.` normal karena variabel environment sudah disuntikkan Compose melalui `env_file`.
+
+   Sinkronisasi penuh hanya dijalankan **sekali** saat cutover. Setelah aplikasi menulis presensi ke PostgreSQL lokal, menjalankannya lagi akan menimpa baris lokal dengan data cloud yang lebih lama. `npm run seed:admin` dan rotasi administrator kini hanya menyinkronkan profil administrator dan audit lognya ke PostgreSQL lokal.
+
 3. Verifikasi mode database aktif (`local_pg`) dan waktu eksekusi (`Server-Timing`) dari VPS:
 
    ```sh

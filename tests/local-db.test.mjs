@@ -9,7 +9,8 @@ import {
   getCachedVerifiedUser,
   setCachedVerifiedUser
 } from '../src/lib/server/auth-cache.js';
-import { syncDataToLocalPg } from '../scripts/sync-supabase-to-local.mjs';
+import { fetchAllFromSupabase, orderColumnFor, syncDataToLocalPg } from '../scripts/sync-supabase-to-local.mjs';
+import { mirrorBootstrapAdmin, mirrorRotation } from '../scripts/lib/local-admin-sync.mjs';
 
 const ids = {
   admin: '10000000-0000-4000-8000-000000000001',
@@ -331,6 +332,79 @@ test('syncDataToLocalPg synchronizes Supabase Cloud datasets idempotently into l
     .single();
   assert.equal(nextAuditErr, null);
   assert.ok(Number(nextAudit.id) > 42);
+});
+
+test('fetchAllFromSupabase orders by primary key and never requests created_at', async () => {
+  assert.equal(orderColumnFor('user_devices'), 'id');
+  assert.equal(orderColumnFor('holidays'), 'holiday_date');
+
+  const paths = [];
+  const rows = await fetchAllFromSupabase('user_devices', async (path) => {
+    paths.push(path);
+    return { ok: true, status: 200, data: [{ id: 'a' }] };
+  });
+  assert.deepEqual(rows, [{ id: 'a' }]);
+  assert.match(paths[0], /order=id\.asc/);
+  assert.doesNotMatch(paths[0], /created_at/);
+});
+
+test('fetchAllFromSupabase skips missing optional tables and reports details for others', async () => {
+  const missing = async () => ({ ok: false, status: 404, data: { code: 'PGRST205', message: 'Could not find the table' } });
+  assert.deepEqual(await fetchAllFromSupabase('notifications', missing), []);
+
+  const badRequest = async () => ({ ok: false, status: 400, data: { code: '42703', message: 'column x does not exist' } });
+  await assert.rejects(fetchAllFromSupabase('attendances', badRequest), /HTTP 400 - 42703: column x does not exist/);
+});
+
+test('Admin seed/rotation mirror only touches administrator profiles and audit logs locally', async (t) => {
+  const pg = new PGlite();
+  t.after(() => pg.close());
+  await pg.exec(await readFile(new URL('../supabase/local_schema.sql', import.meta.url), 'utf8'));
+
+  // Data operasional lokal yang lebih baru harus tetap utuh.
+  await pg.query(
+    `INSERT INTO public.profiles (id, nip, full_name, email, role, must_change_password)
+     VALUES ($1, 'EMP-LOCAL', 'Karyawan Lokal', 'emp@local.test', 'karyawan', false)`,
+    [ids.emp1]
+  );
+  await pg.query(
+    `INSERT INTO public.attendances (user_id, work_date, check_in_at, status)
+     VALUES ($1, '2026-11-23', '2026-11-23T01:00:00Z', 'tepat_waktu')`,
+    [ids.emp1]
+  );
+
+  const cloud = {
+    [ids.admin]: { id: ids.admin, nip: 'ADM-1', full_name: 'Admin Satu', email: 'admin@cloud.test', role: 'administrator', must_change_password: true },
+    [ids.hr]: { id: ids.hr, nip: 'HR-1', full_name: 'Calon Admin', email: 'hr@cloud.test', role: 'administrator', must_change_password: true }
+  };
+  const paths = [];
+  const requestFn = async (path) => {
+    paths.push(path);
+    const params = new URLSearchParams(path.split('?')[1]);
+    const byId = params.get('id')?.replace('eq.', '');
+    const byEmail = params.get('email')?.replace('eq.', '');
+    const row = byId ? cloud[byId] : Object.values(cloud).find((p) => p.email === byEmail);
+    return { ok: true, status: 200, data: row ? [row] : [] };
+  };
+
+  await mirrorBootstrapAdmin(pg, requestFn, 'admin@cloud.test');
+  await mirrorBootstrapAdmin(pg, requestFn, 'admin@cloud.test'); // idempoten
+  assert.ok(paths.every((p) => p.startsWith('/rest/v1/profiles?')), 'Hanya membaca profil, bukan full sync');
+
+  let audits = await pg.query("SELECT count(*)::int AS n FROM public.audit_logs WHERE action = 'bootstrap_administrator'");
+  assert.equal(audits.rows[0].n, 1);
+
+  await mirrorRotation(pg, requestFn, { candidateId: ids.hr, previousRole: 'admin_hr', deactivatePrevious: false });
+  const roles = await pg.query('SELECT id, role FROM public.profiles ORDER BY nip');
+  const byId = Object.fromEntries(roles.rows.map((r) => [r.id, r.role]));
+  assert.equal(byId[ids.hr], 'administrator');
+  assert.equal(byId[ids.admin], 'admin_hr');
+  assert.equal(byId[ids.emp1], 'karyawan');
+
+  const att = await pg.query('SELECT count(*)::int AS n FROM public.attendances');
+  assert.equal(att.rows[0].n, 1, 'Presensi lokal tidak tertimpa');
+  audits = await pg.query("SELECT count(*)::int AS n FROM public.audit_logs WHERE action = 'rotate_administrator'");
+  assert.equal(audits.rows[0].n, 1);
 });
 
 test('auth cookie fingerprint cache deduplicates verified user lookups and invalidates cleanly', () => {
