@@ -3,12 +3,20 @@ import { fail } from '@sveltejs/kit';
 import { createAuditLog } from '$lib/server/audit.js';
 
 export const load = async () => {
-  const { data: accounts } = await supabaseAdmin
-    .from('profiles')
-    .select('*, department:departments(name)')
-    .order('created_at', { ascending: false });
+  const [{ data: accounts }, { data: devices }] = await Promise.all([
+    supabaseAdmin
+      .from('profiles')
+      .select('*, department:departments(name)')
+      .order('created_at', { ascending: false }),
+    supabaseAdmin
+      .from('user_devices')
+      .select('id, user_id, device_name, is_trusted, last_used_at')
+  ]);
 
-  return { accounts: accounts || [] };
+  return {
+    accounts: accounts || [],
+    devices: devices || []
+  };
 };
 
 export const actions = {
@@ -138,5 +146,36 @@ export const actions = {
     });
 
     return { successDelete: true, deletedName: targetProfile.full_name };
+  },
+
+  resetDevices: async ({ request, locals }) => {
+    const { user, profile: actor } = await locals.safeGetSession();
+    if (!user || actor?.role !== 'administrator') {
+      return fail(403, { error: 'Hanya Super Administrator yang berwenang.' });
+    }
+
+    const formData = await request.formData();
+    const targetId = String(formData.get('targetId') || '');
+    if (!targetId) {
+      return fail(400, { error: 'Target akun tidak valid.' });
+    }
+
+    const { error: delErr } = await supabaseAdmin
+      .from('user_devices')
+      .delete()
+      .eq('user_id', targetId);
+
+    if (delErr) {
+      return fail(500, { error: 'Gagal mereset perangkat akun.' });
+    }
+
+    await createAuditLog({
+      actorId: user.id,
+      action: 'reset_all_user_devices',
+      targetType: 'user_devices',
+      detail: { employeeId: targetId }
+    });
+
+    return { successResetDevice: true };
   }
 };

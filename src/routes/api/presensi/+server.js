@@ -101,12 +101,29 @@ export async function POST({ request, locals, getClientAddress }) {
       if (matched) {
         await supabaseAdmin
           .from('user_devices')
-          .update({ last_used_at: now.toISOString(), ip_address: ipAddress })
+          .update({ last_used_at: now.toISOString(), ip_address: ipAddress, device_name: deviceName || matched.device_name })
           .eq('id', matched.id);
+        isUnrecognizedDevice = !matched.is_trusted;
+        if (isUnrecognizedDevice) {
+          locationFlags.push('unrecognized_device');
+        }
       } else {
-        // Device Berbeda / Tidak Dikenal -> Tandai & Kirim Notifikasi HR & Karyawan
+        // Device Berbeda / Tidak Dikenal -> Simpan ke user_devices dengan is_trusted = false
         isUnrecognizedDevice = true;
         locationFlags.push('unrecognized_device');
+
+        await supabaseAdmin.from('user_devices').insert({
+          user_id: user.id,
+          device_id: deviceId,
+          device_name: deviceName,
+          user_agent: userAgent,
+          browser,
+          os,
+          ip_address: ipAddress,
+          is_trusted: false,
+          registered_at: now.toISOString(),
+          last_used_at: now.toISOString()
+        });
 
         await alertUnrecognizedDevice({
           user,
@@ -278,6 +295,11 @@ export async function POST({ request, locals, getClientAddress }) {
         detail: { earlyLeaveMinutes, distanceM, isUnrecognizedDevice }
       });
 
+      let outMsg = 'Presensi Pulang Berhasil Dicatat';
+      if (finalUnrecognized) {
+        outMsg += ' — Catatan: Anda menggunakan perangkat baru/berbeda. Notifikasi telah dikirimkan ke HR.';
+      }
+
       return json({
         success: true,
         type: 'out',
@@ -285,7 +307,7 @@ export async function POST({ request, locals, getClientAddress }) {
         distanceM,
         isUnrecognizedDevice: finalUnrecognized,
         time: timeFormatted,
-        message: 'Presensi Pulang Berhasil Dicatat'
+        message: outMsg
       });
     }
   } catch (err) {

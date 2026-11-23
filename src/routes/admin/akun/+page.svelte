@@ -1,6 +1,6 @@
 <script>
   import { enhance } from '$app/forms';
-  import { ShieldCheck, UserCheck, UserX, Shield, CheckCircle2, AlertCircle, Trash2, MapPin } from '@lucide/svelte';
+  import { ShieldCheck, UserCheck, UserX, Shield, CheckCircle2, AlertCircle, Trash2, MapPin, Smartphone, ShieldAlert } from '@lucide/svelte';
 
   let { data, form } = $props();
 
@@ -33,6 +33,12 @@
     </div>
   {/if}
 
+  {#if form?.successResetDevice}
+    <div class="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-xs font-semibold text-emerald-800">
+      Perangkat akun berhasil direset. Perangkat berikutnya yang digunakan akun akan otomatis menjadi Perangkat Utama.
+    </div>
+  {/if}
+
   {#if form?.error}
     <div class="rounded-2xl border border-red-200 bg-red-50 p-4 text-xs font-semibold text-red-800">
       {form.error}
@@ -46,6 +52,7 @@
           <tr>
             <th class="pb-3 font-semibold uppercase tracking-wider">Identitas Pengguna</th>
             <th class="pb-3 font-semibold uppercase tracking-wider">Lokasi Kerja</th>
+            <th class="pb-3 font-semibold uppercase tracking-wider">Perangkat Anti-Joki</th>
             <th class="pb-3 font-semibold uppercase tracking-wider">Status Login</th>
             <th class="pb-3 font-semibold uppercase tracking-wider">Role Akses</th>
             <th class="pb-3 font-semibold uppercase tracking-wider">Status Akun</th>
@@ -54,6 +61,8 @@
         </thead>
         <tbody class="divide-y divide-slate-100 text-slate-700">
           {#each data.accounts as acc}
+            {@const userDevs = (data.devices || []).filter((d) => d.user_id === acc.id)}
+            {@const hasUntrusted = userDevs.some((d) => !d.is_trusted)}
             <tr class="hover:bg-slate-50/50">
               <td class="py-3.5 max-w-[200px] sm:max-w-[280px]">
                 <p class="font-bold text-slate-900 truncate">{acc.full_name}</p>
@@ -67,6 +76,40 @@
                   </span>
                 {:else}
                   <span class="text-slate-400 text-[11px]">Kantor Pusat</span>
+                {/if}
+              </td>
+              <td class="py-3.5 whitespace-nowrap">
+                {#if userDevs.length === 0}
+                  <span class="text-slate-400 text-[11px]">Belum Ada</span>
+                {:else}
+                  <div class="flex items-center gap-1.5">
+                    {#if hasUntrusted}
+                      <span class="inline-flex items-center gap-1 rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-bold text-rose-800">
+                        <ShieldAlert class="h-3 w-3" />
+                        <span>{userDevs.length} Device (Ada Asing)</span>
+                      </span>
+                    {:else}
+                      <span class="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-700">
+                        <Smartphone class="h-3 w-3" />
+                        <span>{userDevs.length} Utama</span>
+                      </span>
+                    {/if}
+                    <form method="POST" action="?/resetDevices" use:enhance class="inline-block">
+                      <input type="hidden" name="targetId" value={acc.id} />
+                      <button
+                        type="submit"
+                        onclick={(e) => {
+                          if (!confirm(`Reset seluruh perangkat untuk ${acc.full_name}?`)) {
+                            e.preventDefault();
+                          }
+                        }}
+                        class="rounded border border-slate-200 bg-white px-1.5 py-0.5 text-[10px] font-semibold text-slate-500 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 transition"
+                        title="Reset perangkat terdaftar"
+                      >
+                        Reset
+                      </button>
+                    </form>
+                  </div>
                 {/if}
               </td>
               <td class="py-3.5 whitespace-nowrap">

@@ -11,7 +11,13 @@
     ShieldAlert,
     MapPin,
     Trash2,
-    Link2
+    Link2,
+    Smartphone,
+    Laptop,
+    Crosshair,
+    ExternalLink,
+    ShieldCheck,
+    Check
   } from '@lucide/svelte';
 
   let { data, form } = $props();
@@ -28,6 +34,32 @@
   let mapsResolveSuccess = $state(false);
   let editWorkLat = $state(data.employee.work_lat ?? '');
   let editWorkLng = $state(data.employee.work_lng ?? '');
+  let gettingCurrentLocation = $state(false);
+
+  function useCurrentLocation() {
+    if (typeof navigator === 'undefined' || !navigator.geolocation) {
+      mapsResolveSuccess = false;
+      mapsResolveMsg = 'Browser tidak mendukung geolokasi GPS.';
+      return;
+    }
+    gettingCurrentLocation = true;
+    mapsResolveMsg = '';
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        editWorkLat = pos.coords.latitude.toFixed(6);
+        editWorkLng = pos.coords.longitude.toFixed(6);
+        mapsResolveSuccess = true;
+        mapsResolveMsg = `Berhasil mengambil koordinat GPS saat ini (Akurasi: ±${Math.round(pos.coords.accuracy)}m)`;
+        gettingCurrentLocation = false;
+      },
+      (err) => {
+        mapsResolveSuccess = false;
+        mapsResolveMsg = 'Gagal mendeteksi lokasi GPS perangkat. Pastikan izin lokasi aktif.';
+        gettingCurrentLocation = false;
+      },
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+    );
+  }
 
   async function resolveMapsLink() {
     if (!mapsUrlInput.trim()) return;
@@ -77,6 +109,18 @@
       year: 'numeric'
     }).format(date);
   }
+
+  function formatDateTime(isoString) {
+    if (!isoString) return '-';
+    return new Intl.DateTimeFormat('id-ID', {
+      timeZone: 'Asia/Jakarta',
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    }).format(new Date(isoString)) + ' WIB';
+  }
 </script>
 
 <svelte:head>
@@ -106,9 +150,15 @@
     </div>
   {/if}
 
-  {#if form?.errorReset || form?.errorLocation || form?.errorDelete || form?.error}
+  {#if form?.successDevice}
+    <div class="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-xs font-semibold text-emerald-800">
+      {form.successDevice}
+    </div>
+  {/if}
+
+  {#if form?.errorReset || form?.errorLocation || form?.errorDelete || form?.errorDevice || form?.error}
     <div class="rounded-2xl border border-red-200 bg-red-50 p-4 text-xs font-semibold text-red-800">
-      {form.errorReset || form.errorLocation || form.errorDelete || form.error}
+      {form.errorReset || form.errorLocation || form.errorDelete || form.errorDevice || form.error}
     </div>
   {/if}
 
@@ -367,6 +417,29 @@
             </div>
           </div>
 
+          <div class="flex flex-wrap items-center gap-2 pt-1">
+            <button
+              type="button"
+              onclick={useCurrentLocation}
+              disabled={gettingCurrentLocation}
+              class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-[11px] font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50 transition"
+            >
+              <Crosshair class="h-3 w-3 text-emerald-600 {gettingCurrentLocation ? 'animate-spin' : ''}" />
+              <span>{gettingCurrentLocation ? 'Mengambil GPS...' : 'Ambil Titik GPS Saya Saat Ini'}</span>
+            </button>
+            {#if editWorkLat && editWorkLng}
+              <a
+                href="https://www.google.com/maps?q={editWorkLat},{editWorkLng}"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-[11px] font-semibold text-indigo-600 hover:bg-indigo-50 transition"
+              >
+                <ExternalLink class="h-3 w-3" />
+                <span>Cek di Google Maps</span>
+              </a>
+            {/if}
+          </div>
+
           <div class="flex items-center justify-between pt-2">
             <p class="text-[11px] text-slate-400">
               {#if data.employee.work_lat && data.employee.work_lng}
@@ -383,6 +456,99 @@
             </button>
           </div>
         </form>
+      </div>
+
+      <!-- Daftar Perangkat Terdaftar (Anti-Joki) -->
+      <div class="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-xs">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+          <div>
+            <h3 class="text-sm font-bold text-slate-900 flex items-center gap-1.5">
+              <Smartphone class="h-4 w-4 text-emerald-600" />
+              <span>Daftar Perangkat Terdaftar (Anti-Joki)</span>
+            </h3>
+            <p class="text-xs text-slate-500">
+              Sistem mencatat identitas unik setiap perangkat yang mengakses akun karyawan ini
+            </p>
+          </div>
+          {#if data.devices && data.devices.length > 0}
+            <form method="POST" action="?/resetAllDevices">
+              <button
+                type="submit"
+                onclick={(e) => {
+                  if (!confirm('Yakin ingin mereset semua perangkat terdaftar karyawan ini? Perangkat berikutnya yang digunakan karyawan akan otomatis menjadi Perangkat Utama.')) {
+                    e.preventDefault();
+                  }
+                }}
+                class="rounded-xl border border-rose-200 bg-rose-50 px-3 py-1.5 text-[11px] font-semibold text-rose-700 hover:bg-rose-100 transition"
+              >
+                Reset Semua Perangkat
+              </button>
+            </form>
+          {/if}
+        </div>
+
+        {#if !data.devices || data.devices.length === 0}
+          <div class="py-8 text-center text-xs text-slate-400">
+            <Smartphone class="mx-auto h-8 w-8 text-slate-300" />
+            <p class="mt-2 font-medium text-slate-600">Belum ada perangkat yang terdaftar di database.</p>
+            <p class="mt-1 text-[11px] text-slate-400">
+              Perangkat pertama yang digunakan karyawan saat presensi akan otomatis dicatat sebagai <strong>Perangkat Utama</strong>.
+            </p>
+          </div>
+        {:else}
+          <div class="mt-4 divide-y divide-slate-100 text-xs">
+            {#each data.devices as dev}
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-3.5">
+                <div class="min-w-0 flex-1 space-y-1">
+                  <div class="flex items-center gap-2">
+                    <p class="font-bold text-slate-900 truncate">{dev.device_name || 'Perangkat'}</p>
+                    {#if dev.is_trusted}
+                      <span class="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-800">
+                        <Check class="h-3 w-3" />
+                        Perangkat Utama
+                      </span>
+                    {:else}
+                      <span class="inline-flex items-center gap-1 rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-bold text-rose-800">
+                        <ShieldAlert class="h-3 w-3" />
+                        Perangkat Berbeda / Asing
+                      </span>
+                    {/if}
+                  </div>
+                  <div class="flex flex-wrap gap-x-3 gap-y-0.5 text-[11px] text-slate-500">
+                    <span>Sistem: <strong class="text-slate-700">{dev.browser || '-'} / {dev.os || '-'}</strong></span>
+                    <span>IP: <strong class="text-slate-700">{dev.ip_address || '-'}</strong></span>
+                    <span>Aktif: <strong class="text-slate-700">{formatDateTime(dev.last_used_at)}</strong></span>
+                  </div>
+                  <p class="text-[10px] text-slate-400 font-mono truncate">ID: {dev.device_id}</p>
+                </div>
+
+                <div class="flex items-center gap-2 shrink-0">
+                  {#if !dev.is_trusted}
+                    <form method="POST" action="?/setPrimaryDevice">
+                      <input type="hidden" name="deviceDbId" value={dev.id} />
+                      <button
+                        type="submit"
+                        class="rounded-lg bg-emerald-600 px-2.5 py-1.5 text-[11px] font-semibold text-white hover:bg-emerald-700 transition"
+                      >
+                        Jadikan Utama
+                      </button>
+                    </form>
+                  {/if}
+                  <form method="POST" action="?/deleteDevice">
+                    <input type="hidden" name="deviceDbId" value={dev.id} />
+                    <button
+                      type="submit"
+                      class="rounded-lg border border-slate-200 bg-white p-1.5 text-slate-500 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 transition"
+                      title="Hapus perangkat ini"
+                    >
+                      <Trash2 class="h-3.5 w-3.5" />
+                    </button>
+                  </form>
+                </div>
+              </div>
+            {/each}
+          </div>
+        {/if}
       </div>
 
       <!-- Riwayat Presensi Karyawan -->

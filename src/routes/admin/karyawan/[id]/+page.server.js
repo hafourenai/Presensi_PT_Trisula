@@ -30,10 +30,19 @@ export const load = async ({ params }) => {
     .order('work_date', { ascending: false })
     .limit(10);
 
+  // Daftar Perangkat Terdaftar (Anti-Joki)
+  const { data: devices } = await supabaseAdmin
+    .from('user_devices')
+    .select('*')
+    .eq('user_id', id)
+    .order('is_trusted', { ascending: false })
+    .order('last_used_at', { ascending: false });
+
   return {
     employee,
     departments: departments || [],
-    recentAttendances: recentAttendances || []
+    recentAttendances: recentAttendances || [],
+    devices: devices || []
   };
 };
 
@@ -236,5 +245,100 @@ export const actions = {
     });
 
     throw redirect(303, '/admin/karyawan?deleted=true');
+  },
+
+  setPrimaryDevice: async ({ params, request, locals }) => {
+    const { user, profile: actor } = await locals.safeGetSession();
+    if (!user || !actor || !['administrator', 'admin_hr'].includes(actor.role)) {
+      return fail(403, { errorDevice: 'Akses ditolak.' });
+    }
+    const id = params.id;
+    const formData = await request.formData();
+    const deviceDbId = String(formData.get('deviceDbId') || '');
+    if (!deviceDbId) return fail(400, { errorDevice: 'ID perangkat tidak valid.' });
+
+    // Set semua perangkat karyawan ini ke is_trusted = false
+    await supabaseAdmin
+      .from('user_devices')
+      .update({ is_trusted: false })
+      .eq('user_id', id);
+
+    // Jadikan perangkat target sebagai is_trusted = true
+    const { error: updErr } = await supabaseAdmin
+      .from('user_devices')
+      .update({ is_trusted: true })
+      .eq('id', deviceDbId)
+      .eq('user_id', id);
+
+    if (updErr) {
+      return fail(500, { errorDevice: 'Gagal memperbarui status perangkat utama.' });
+    }
+
+    await createAuditLog({
+      actorId: user.id,
+      action: 'set_primary_device',
+      targetType: 'user_devices',
+      targetId: deviceDbId,
+      detail: { employeeId: id }
+    });
+
+    return { successDevice: 'Perangkat berhasil ditetapkan sebagai Perangkat Utama.' };
+  },
+
+  deleteDevice: async ({ params, request, locals }) => {
+    const { user, profile: actor } = await locals.safeGetSession();
+    if (!user || !actor || !['administrator', 'admin_hr'].includes(actor.role)) {
+      return fail(403, { errorDevice: 'Akses ditolak.' });
+    }
+    const id = params.id;
+    const formData = await request.formData();
+    const deviceDbId = String(formData.get('deviceDbId') || '');
+    if (!deviceDbId) return fail(400, { errorDevice: 'ID perangkat tidak valid.' });
+
+    const { error: delErr } = await supabaseAdmin
+      .from('user_devices')
+      .delete()
+      .eq('id', deviceDbId)
+      .eq('user_id', id);
+
+    if (delErr) {
+      return fail(500, { errorDevice: 'Gagal menghapus perangkat.' });
+    }
+
+    await createAuditLog({
+      actorId: user.id,
+      action: 'delete_user_device',
+      targetType: 'user_devices',
+      targetId: deviceDbId,
+      detail: { employeeId: id }
+    });
+
+    return { successDevice: 'Perangkat berhasil dihapus dari sistem.' };
+  },
+
+  resetAllDevices: async ({ params, locals }) => {
+    const { user, profile: actor } = await locals.safeGetSession();
+    if (!user || !actor || !['administrator', 'admin_hr'].includes(actor.role)) {
+      return fail(403, { errorDevice: 'Akses ditolak.' });
+    }
+    const id = params.id;
+
+    const { error: delErr } = await supabaseAdmin
+      .from('user_devices')
+      .delete()
+      .eq('user_id', id);
+
+    if (delErr) {
+      return fail(500, { errorDevice: 'Gagal mereset perangkat karyawan.' });
+    }
+
+    await createAuditLog({
+      actorId: user.id,
+      action: 'reset_all_user_devices',
+      targetType: 'user_devices',
+      detail: { employeeId: id }
+    });
+
+    return { successDevice: 'Semua perangkat berhasil direset. Perangkat berikutnya yang digunakan karyawan akan otomatis terdaftar sebagai Perangkat Utama.' };
   }
 };

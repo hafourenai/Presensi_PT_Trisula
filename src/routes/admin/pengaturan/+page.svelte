@@ -1,6 +1,6 @@
 <script>
   import { enhance } from '$app/forms';
-  import { Settings, MapPin, Clock, Calendar, CheckCircle2, AlertCircle, Plus, Link2 } from '@lucide/svelte';
+  import { Settings, MapPin, Clock, Calendar, CheckCircle2, AlertCircle, Plus, Link2, Crosshair, ExternalLink } from '@lucide/svelte';
 
   let { data, form } = $props();
   let loadingSettings = $state(false);
@@ -13,6 +13,32 @@
   let mapsResolveSuccess = $state(false);
   let officeLatInput = $state(data.settings?.office_lat ?? '');
   let officeLngInput = $state(data.settings?.office_lng ?? '');
+  let gettingCurrentLocation = $state(false);
+
+  function useCurrentLocation() {
+    if (typeof navigator === 'undefined' || !navigator.geolocation) {
+      mapsResolveSuccess = false;
+      mapsResolveMsg = 'Browser tidak mendukung geolokasi GPS.';
+      return;
+    }
+    gettingCurrentLocation = true;
+    mapsResolveMsg = '';
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        officeLatInput = pos.coords.latitude.toFixed(6);
+        officeLngInput = pos.coords.longitude.toFixed(6);
+        mapsResolveSuccess = true;
+        mapsResolveMsg = `Berhasil mengambil koordinat GPS saat ini (Akurasi: ±${Math.round(pos.coords.accuracy)}m)`;
+        gettingCurrentLocation = false;
+      },
+      (err) => {
+        mapsResolveSuccess = false;
+        mapsResolveMsg = 'Gagal mendeteksi lokasi GPS perangkat. Pastikan izin lokasi aktif.';
+        gettingCurrentLocation = false;
+      },
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+    );
+  }
 
   async function resolveMapsLink() {
     if (!mapsUrlInput.trim()) return;
@@ -193,6 +219,30 @@
               class="mt-auto pt-1.5 w-full rounded-xl border border-slate-200 bg-slate-50/50 p-3 text-slate-900 focus:outline-none"
             />
           </div>
+        </div>
+
+        <!-- Tombol Aksi GPS & Verifikasi Google Maps -->
+        <div class="flex flex-wrap items-center gap-2 pt-1">
+          <button
+            type="button"
+            onclick={useCurrentLocation}
+            disabled={gettingCurrentLocation}
+            class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-[11px] font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50 transition"
+          >
+            <Crosshair class="h-3 w-3 text-emerald-600 {gettingCurrentLocation ? 'animate-spin' : ''}" />
+            <span>{gettingCurrentLocation ? 'Mengambil GPS...' : 'Ambil Titik GPS Saya Saat Ini'}</span>
+          </button>
+          {#if officeLatInput && officeLngInput}
+            <a
+              href="https://www.google.com/maps?q={officeLatInput},{officeLngInput}"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-[11px] font-semibold text-indigo-600 hover:bg-indigo-50 transition"
+            >
+              <ExternalLink class="h-3 w-3" />
+              <span>Cek Titik di Google Maps</span>
+            </a>
+          {/if}
         </div>
 
         <div class="border-t border-slate-100 pt-4">

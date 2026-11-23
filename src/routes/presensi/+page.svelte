@@ -16,12 +16,18 @@
     Smartphone
   } from '@lucide/svelte';
   import { getBrowserInfo, getOrCreateDeviceId } from '$lib/device.js';
+  import { calculateDistance } from '$lib/geo.js';
 
   let { data } = $props();
 
   let attendance = $state(data.attendance);
   let currentTime = $state('');
   let timeInterval;
+
+  // Device Sync State
+  let deviceSyncLoading = $state(true);
+  let deviceSyncData = $state(null);
+  let watchId = null;
 
   // Kamera & MediaPipe State
   let videoEl = $state(null);
@@ -118,16 +124,20 @@
       // Force re-evaluation of derived time validation
       currentMinutes = getCurrentMinutes();
     }, 1000);
-    getLocation();
+    startLocationWatch();
+    syncCurrentDevice();
   });
 
   onDestroy(() => {
     if (timeInterval) clearInterval(timeInterval);
+    if (watchId !== null && typeof navigator !== 'undefined' && navigator.geolocation) {
+      navigator.geolocation.clearWatch(watchId);
+    }
     stopCamera();
   });
 
-  function getLocation() {
-    if (!navigator.geolocation) {
+  function startLocationWatch() {
+    if (typeof navigator === 'undefined' || !navigator.geolocation) {
       locationError = 'Perangkat tidak mendukung geolokasi GPS.';
       return;
     }
@@ -135,32 +145,76 @@
     locationLoading = true;
     locationError = '';
 
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        locationLoading = false;
-        // Deteksi sinyal mock location jika didukung browser
-        const isMocked = !!(pos.coords?.isMock || (pos.coords && 'mocked' in pos.coords && pos.coords.mocked));
+    navigator.geolocation.getCurrentPosition(handlePositionUpdate, handlePositionError, {
+      enableHighAccuracy: true,
+      timeout: 10000,
+      maximumAge: 0
+    });
 
-        locationData = {
-          lat: pos.coords.latitude,
-          lng: pos.coords.longitude,
-          accuracy: pos.coords.accuracy,
-          timestamp: pos.timestamp,
-          isMock: isMocked,
-          altitude: pos.coords.altitude,
-          speed: pos.coords.speed
-        };
-      },
-      (err) => {
-        locationLoading = false;
-        if (err.code === 1) {
-          locationError = 'Izin lokasi GPS ditolak oleh browser. Wajib mengaktifkan izin GPS untuk presensi.';
-        } else {
-          locationError = 'Gagal mendeteksi koordinat GPS perangkat.';
-        }
-      },
-      { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 }
-    );
+    if (watchId !== null) navigator.geolocation.clearWatch(watchId);
+    watchId = navigator.geolocation.watchPosition(handlePositionUpdate, handlePositionError, {
+      enableHighAccuracy: true,
+      timeout: 20000,
+      maximumAge: 3000
+    });
+  }
+
+  function handlePositionUpdate(pos) {
+    locationLoading = false;
+    const isMocked = !!(pos.coords?.isMock || (pos.coords && 'mocked' in pos.coords && pos.coords.mocked));
+
+    locationData = {
+      lat: pos.coords.latitude,
+      lng: pos.coords.longitude,
+      accuracy: pos.coords.accuracy,
+      timestamp: pos.timestamp,
+      isMock: isMocked,
+      altitude: pos.coords.altitude,
+      speed: pos.coords.speed
+    };
+
+    if (data.settings?.office_lat && data.settings?.office_lng) {
+      distanceToOffice = calculateDistance(
+        pos.coords.latitude,
+        pos.coords.longitude,
+        data.settings.office_lat,
+        data.settings.office_lng
+      );
+    }
+  }
+
+  function handlePositionError(err) {
+    locationLoading = false;
+    if (err.code === 1) {
+      locationError = 'Izin lokasi GPS ditolak oleh browser. Wajib mengaktifkan izin GPS untuk presensi.';
+    } else {
+      locationError = 'Gagal mendeteksi koordinat GPS perangkat.';
+    }
+  }
+
+  async function syncCurrentDevice() {
+    try {
+      const devInfo = getBrowserInfo();
+      const devId = getOrCreateDeviceId();
+      const res = await fetch('/api/device/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          deviceId: devId,
+          deviceName: devInfo.deviceName,
+          browser: devInfo.browser,
+          os: devInfo.os
+        })
+      });
+      const json = await res.json();
+      if (json.success) {
+        deviceSyncData = json;
+      }
+    } catch (e) {
+      console.warn('Gagal sinkronisasi data device:', e);
+    } finally {
+      deviceSyncLoading = false;
+    }
   }
 
   async function initFaceDetector() {
@@ -466,34 +520,103 @@
     </div>
   </div>
 
-  <!-- Device Info Card -->
-  <div class="flex items-center justify-between rounded-2xl border border-slate-200/80 bg-white p-4 text-xs shadow-xs">
-    <div class="flex items-center gap-2 text-slate-700">
-      <Smartphone class="h-4 w-4 text-slate-500" />
-      <span>Perangkat saat ini: <strong>{currentDeviceInfo.deviceName || 'Mendeteksi...'}</strong></span>
+  <!-- Device Info & Anti-Joki Status Card -->
+  {#if deviceSyncLoading}
+    <div class="flex items-center gap-2 rounded-2xl border border-slate-200/80 bg-white p-4 text-xs shadow-xs text-slate-500 animate-pulse">
+      <Smartphone class="h-4 w-4 text-slate-400" />
+      <span>Memeriksa status perangkat pada database...</span>
     </div>
-    <span class="rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-600">Anti-Joki Aktif</span>
-  </div>
+  {:else if deviceSyncData && !deviceSyncData.isTrusted}
+    <!-- Peringatan Jelas: Perangkat Berbeda / Tidak Dikenal -->
+    <div class="rounded-2xl border border-rose-300 bg-rose-50 p-4 text-xs shadow-xs space-y-2">
+      <div class="flex items-start justify-between gap-3">
+        <div class="flex items-start gap-2.5 text-rose-950">
+          <ShieldAlert class="h-5 w-5 text-rose-600 shrink-0 mt-0.5" />
+          <div>
+            <h4 class="font-bold text-rose-900 text-xs">⚠️ Perangkat Berbeda Terdeteksi</h4>
+            <p class="mt-1 text-[11px] text-rose-800 leading-relaxed">
+              Akun Anda terdaftar di: <strong>{deviceSyncData.primaryDevice?.device_name || 'Perangkat Utama Lain'}</strong>.
+              <br />
+              Saat ini Anda mengakses dari: <strong>{currentDeviceInfo.deviceName}</strong>.
+            </p>
+          </div>
+        </div>
+        <span class="shrink-0 rounded-full bg-rose-200 px-2.5 py-0.5 text-[10px] font-bold text-rose-800">
+          Device Berbeda
+        </span>
+      </div>
+      <p class="text-[10px] font-medium text-rose-700 bg-rose-100/70 p-2 rounded-lg">
+        Aktivitas dan presensi dari perangkat ini dicatat sebagai <strong>Perangkat Asing</strong> dan dilaporkan ke HR. Jika Anda mengganti HP/laptop, hubungi HR untuk mereset perangkat terdaftar.
+      </p>
+    </div>
+  {:else}
+    <!-- Perangkat Utama Terverifikasi -->
+    <div class="flex items-center justify-between rounded-2xl border border-emerald-200/80 bg-emerald-50/50 p-4 text-xs shadow-xs">
+      <div class="flex items-center gap-2 text-slate-800">
+        <Smartphone class="h-4 w-4 text-emerald-600" />
+        <span>Perangkat terdaftar: <strong>{currentDeviceInfo.deviceName || 'Perangkat Utama'}</strong></span>
+      </div>
+      <span class="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-0.5 text-[10px] font-bold text-emerald-800">
+        ✓ Perangkat Utama
+      </span>
+    </div>
+  {/if}
 
-  <!-- GPS Status Badge -->
-  <div class="flex items-center justify-between rounded-2xl border border-slate-200/80 bg-white p-4 text-xs shadow-xs">
-    <div class="flex items-center gap-2 text-slate-700">
-      <MapPin class="h-4 w-4 text-emerald-600" />
-      {#if locationLoading}
-        <span class="animate-pulse">Mendeteksi lokasi GPS...</span>
-      {:else if locationData.lat !== null}
-        <span>GPS Terdeteksi (Akurasi: ±{Math.round(locationData.accuracy || 0)}m)</span>
-      {:else}
-        <span class="text-amber-600">{locationError || 'Lokasi tidak tersedia'}</span>
-      {/if}
+  <!-- GPS Status & Real-time Radius Badge -->
+  <div class="rounded-2xl border {distanceToOffice !== null ? (distanceToOffice <= data.settings.office_radius_m ? 'border-emerald-200 bg-white' : 'border-amber-300 bg-amber-50/40') : 'border-slate-200/80 bg-white'} p-4 text-xs shadow-xs space-y-2.5">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-2 font-semibold text-slate-800">
+        <MapPin class="h-4 w-4 {distanceToOffice !== null && distanceToOffice <= data.settings.office_radius_m ? 'text-emerald-600' : 'text-amber-600'}" />
+        <span>Status Lokasi GPS Real-time</span>
+      </div>
+      <button
+        type="button"
+        onclick={startLocationWatch}
+        class="flex items-center gap-1 font-semibold text-emerald-700 hover:text-emerald-800 text-[11px]"
+      >
+        <RefreshCw class="h-3 w-3 {locationLoading ? 'animate-spin' : ''}" />
+        <span>{locationLoading ? 'Mencari...' : 'Perbarui GPS'}</span>
+      </button>
     </div>
-    <button
-      onclick={getLocation}
-      class="flex items-center gap-1 font-semibold text-emerald-600 hover:text-emerald-700"
-    >
-      <RefreshCw class="h-3.5 w-3.5" />
-      <span>Segarkan</span>
-    </button>
+
+    {#if locationLoading && locationData.lat === null}
+      <p class="text-[11px] text-slate-500 animate-pulse">Mengunci sinyal satelit GPS perangkat...</p>
+    {:else if locationData.lat !== null}
+      <div class="space-y-1.5 text-[11px]">
+        <div class="flex items-center justify-between">
+          <span class="text-slate-500">Jarak ke {data.settings.location_name}:</span>
+          {#if distanceToOffice !== null}
+            <strong class="{distanceToOffice <= data.settings.office_radius_m ? 'text-emerald-700' : 'text-amber-700 font-bold'}">
+              {distanceToOffice} meter ({distanceToOffice <= data.settings.office_radius_m ? `Dalam radius ${data.settings.office_radius_m}m` : `Di luar radius ${data.settings.office_radius_m}m`})
+            </strong>
+          {:else}
+            <span class="text-slate-400">Menghitung...</span>
+          {/if}
+        </div>
+
+        <div class="flex items-center justify-between">
+          <span class="text-slate-500">Akurasi Sinyal GPS:</span>
+          <span class="font-medium {locationData.accuracy <= 30 ? 'text-emerald-700' : locationData.accuracy <= 100 ? 'text-blue-700' : 'text-amber-700'}">
+            ±{Math.round(locationData.accuracy || 0)}m
+            {#if locationData.accuracy <= 30}
+              (Sangat Akurat)
+            {:else if locationData.accuracy <= 100}
+              (Cukup Akurat)
+            {:else}
+              (Sinyal Kasar / Sedang Mengunci)
+            {/if}
+          </span>
+        </div>
+
+        {#if locationData.accuracy > 100}
+          <div class="rounded-lg bg-amber-100/70 p-2 text-[10px] text-amber-800 leading-relaxed mt-1">
+            💡 <strong>Tips Akurasi:</strong> Jika menggunakan HP, pastikan mode GPS <em>"Akurasi Tinggi"</em> aktif dan hindari berada di dalam ruangan tertutup tanpa jendela agar sinyal satelit GPS dapat terkunci maksimal.
+          </div>
+        {/if}
+      </div>
+    {:else}
+      <p class="text-[11px] font-medium text-red-600">{locationError || 'Lokasi GPS belum terdeteksi. Izinkan akses GPS pada browser Anda.'}</p>
+    {/if}
   </div>
 
   <!-- Work Hours Status Badge -->

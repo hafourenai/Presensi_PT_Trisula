@@ -18,29 +18,45 @@ function extractCoordsFromUrl(text) {
     }
   }
 
-  // Format 2: URL @lat,lng misal ".../@-6.2087634,106.845599,17z/..."
-  const atCoords = text.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
-  if (atCoords) {
-    return { lat: parseFloat(atCoords[1]), lng: parseFloat(atCoords[2]) };
-  }
-
-  // Format 3: Query param ?q=lat,lng atau &q=lat,lng atau ?ll=lat,lng
-  const queryCoords = text.match(/[?&](?:q|ll|query|center)=(-?\d+\.\d+),(-?\d+\.\d+)/);
-  if (queryCoords) {
-    return { lat: parseFloat(queryCoords[1]), lng: parseFloat(queryCoords[2]) };
-  }
-
-  // Format 4: Google Maps data parameter !3d(lat)!4d(lng)
+  // Format 2: Google Maps data parameter !3d(lat)!4d(lng) -> PIN TITIK LOKASI ASLI (Prioritas Utama)
   const dataCoordsLat = text.match(/!3d(-?\d+\.\d+)/);
   const dataCoordsLng = text.match(/!4d(-?\d+\.\d+)/);
   if (dataCoordsLat && dataCoordsLng) {
-    return { lat: parseFloat(dataCoordsLat[1]), lng: parseFloat(dataCoordsLng[1]) };
+    const lat = parseFloat(dataCoordsLat[1]);
+    const lng = parseFloat(dataCoordsLng[1]);
+    if (lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
+      return { lat, lng };
+    }
   }
 
-  // Format 5: Link ftid / place coordinates
+  // Format 3: Link ftid / place coordinates (/place/Nama+Tempat/-6.1234,106.5678)
   const ftidCoords = text.match(/\/place\/[^/]+\/(-?\d+\.\d+),(-?\d+\.\d+)/);
   if (ftidCoords) {
-    return { lat: parseFloat(ftidCoords[1]), lng: parseFloat(ftidCoords[2]) };
+    const lat = parseFloat(ftidCoords[1]);
+    const lng = parseFloat(ftidCoords[2]);
+    if (lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
+      return { lat, lng };
+    }
+  }
+
+  // Format 4: Query param ?q=lat,lng atau &q=lat,lng atau ?ll=lat,lng
+  const queryCoords = text.match(/[?&](?:q|ll|query|center|daddr)=(-?\d+\.\d+),(-?\d+\.\d+)/);
+  if (queryCoords) {
+    const lat = parseFloat(queryCoords[1]);
+    const lng = parseFloat(queryCoords[2]);
+    if (lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
+      return { lat, lng };
+    }
+  }
+
+  // Format 5: URL @lat,lng misal ".../@-6.2087634,106.845599,17z/..." (Hanya sebagai fallback viewport)
+  const atCoords = text.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+  if (atCoords) {
+    const lat = parseFloat(atCoords[1]);
+    const lng = parseFloat(atCoords[2]);
+    if (lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
+      return { lat, lng };
+    }
   }
 
   return null;
