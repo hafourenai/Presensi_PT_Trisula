@@ -1,0 +1,18 @@
+{
+  "repo_name": "absen",
+  "source_path": "D:\\absen",
+  "source_sha": "2a6e3834be14285aa0f201528aaa77c4c0550beb",
+  "generated_at": "2026-11-23T00:00:00Z",
+  "generator": "hermes-agent code-wiki skill v0.1.0",
+  "modules_documented": [
+    "auth-routing",
+    "presensi",
+    "device-binding",
+    "data-access",
+    "database",
+    "backoffice",
+    "employee-self-service",
+    "notifications",
+    "deployment-ops"
+  ]
+}
