@@ -478,7 +478,7 @@
               <button
                 type="submit"
                 onclick={(e) => {
-                  if (!confirm('Yakin ingin mereset semua perangkat terdaftar karyawan ini? Perangkat berikutnya yang digunakan karyawan akan otomatis menjadi Perangkat Utama.')) {
+                  if (!confirm('Yakin ingin mereset semua perangkat terdaftar karyawan ini? Karyawan akan diminta mengonfirmasi pendaftaran Perangkat Utama saat login berikutnya.')) {
                     e.preventDefault();
                   }
                 }}
@@ -495,7 +495,7 @@
             <Smartphone class="mx-auto h-8 w-8 text-slate-300" />
             <p class="mt-2 font-medium text-slate-600">Belum ada perangkat yang terdaftar di database.</p>
             <p class="mt-1 text-[11px] text-slate-400">
-              Perangkat pertama yang digunakan karyawan saat presensi akan otomatis dicatat sebagai <strong>Perangkat Utama</strong>.
+              Karyawan akan diminta mengonfirmasi pendaftaran <strong>Perangkat Utama</strong> saat aktivasi akun atau login berikutnya.
             </p>
           </div>
         {:else}

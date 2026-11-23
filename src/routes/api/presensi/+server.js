@@ -73,16 +73,43 @@ export async function POST({ request, locals, getClientAddress }) {
     });
     const timeFormatted = timeFormatter.format(now);
 
-    // Verifikasi & Bind Device
+    // Verifikasi & Bind Device (tidak pernah auto-register perangkat utama secara diam-diam)
     const { data: userDevices } = await supabaseAdmin
       .from('user_devices')
       .select('*')
       .eq('user_id', user.id);
 
-    let isUnrecognizedDevice = false;
+    const devices = userDevices || [];
+    const primaryDevice = devices.find((d) => d.is_trusted);
 
-    if (!userDevices || userDevices.length === 0) {
-      // Perangkat pertama kali: daftarkan secara otomatis sebagai perangkat utama
+    if (!primaryDevice) {
+      return json(
+        {
+          success: false,
+          needsRegistration: true,
+          message: 'Perangkat utama akun Anda belum didaftarkan. Silakan konfirmasi pendaftaran perangkat terlebih dahulu.'
+        },
+        { status: 403 }
+      );
+    }
+
+    let isUnrecognizedDevice = false;
+    const matched = devices.find((d) => d.device_id === deviceId);
+
+    if (matched) {
+      await supabaseAdmin
+        .from('user_devices')
+        .update({ last_used_at: now.toISOString(), ip_address: ipAddress, device_name: deviceName || matched.device_name })
+        .eq('id', matched.id);
+      isUnrecognizedDevice = !matched.is_trusted;
+      if (isUnrecognizedDevice) {
+        locationFlags.push('unrecognized_device');
+      }
+    } else {
+      // Device Berbeda / Tidak Dikenal -> Simpan ke user_devices dengan is_trusted = false
+      isUnrecognizedDevice = true;
+      locationFlags.push('unrecognized_device');
+
       await supabaseAdmin.from('user_devices').insert({
         user_id: user.id,
         device_id: deviceId,
@@ -91,52 +118,22 @@ export async function POST({ request, locals, getClientAddress }) {
         browser,
         os,
         ip_address: ipAddress,
-        is_trusted: true,
+        is_trusted: false,
         registered_at: now.toISOString(),
         last_used_at: now.toISOString()
       });
-    } else {
-      // Sudah ada perangkat terdaftar sebelumnya, periksa apakah deviceId ini cocok
-      const matched = userDevices.find(d => d.device_id === deviceId);
-      if (matched) {
-        await supabaseAdmin
-          .from('user_devices')
-          .update({ last_used_at: now.toISOString(), ip_address: ipAddress, device_name: deviceName || matched.device_name })
-          .eq('id', matched.id);
-        isUnrecognizedDevice = !matched.is_trusted;
-        if (isUnrecognizedDevice) {
-          locationFlags.push('unrecognized_device');
-        }
-      } else {
-        // Device Berbeda / Tidak Dikenal -> Simpan ke user_devices dengan is_trusted = false
-        isUnrecognizedDevice = true;
-        locationFlags.push('unrecognized_device');
 
-        await supabaseAdmin.from('user_devices').insert({
-          user_id: user.id,
-          device_id: deviceId,
-          device_name: deviceName,
-          user_agent: userAgent,
-          browser,
-          os,
-          ip_address: ipAddress,
-          is_trusted: false,
-          registered_at: now.toISOString(),
-          last_used_at: now.toISOString()
-        });
-
-        await alertUnrecognizedDevice({
-          user,
-          profile,
-          deviceId,
-          deviceName,
-          browser,
-          os,
-          ip: ipAddress,
-          timeStr: timeFormatted,
-          dateStr: today
-        });
-      }
+      await alertUnrecognizedDevice({
+        user,
+        profile,
+        deviceId,
+        deviceName,
+        browser,
+        os,
+        ip: ipAddress,
+        timeStr: timeFormatted,
+        dateStr: today
+      });
     }
 
     // Ambil settings kantor

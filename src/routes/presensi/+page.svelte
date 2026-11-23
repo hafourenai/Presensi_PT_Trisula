@@ -1,5 +1,6 @@
 <script>
   import { onMount, onDestroy } from 'svelte';
+  import { goto } from '$app/navigation';
   import {
     Camera,
     MapPin,
@@ -28,6 +29,7 @@
   // Device Sync State
   let deviceSyncLoading = $state(true);
   let deviceSyncData = $state(null);
+  let deviceSyncError = $state('');
   let watchId = null;
 
   // Kamera & MediaPipe State
@@ -194,6 +196,8 @@
   }
 
   async function syncCurrentDevice() {
+    deviceSyncLoading = true;
+    deviceSyncError = '';
     try {
       const devInfo = getBrowserInfo();
       const devId = getOrCreateDeviceId();
@@ -209,10 +213,17 @@
       });
       const json = await res.json();
       if (json.success) {
+        if (json.needsRegistration) {
+          await goto('/ganti-password');
+          return;
+        }
         deviceSyncData = json;
+      } else {
+        deviceSyncError = json.message || 'Gagal memverifikasi status perangkat.';
       }
     } catch (e) {
       console.warn('Gagal sinkronisasi data device:', e);
+      deviceSyncError = 'Tidak dapat memverifikasi perangkat saat ini. Periksa koneksi internet Anda.';
     } finally {
       deviceSyncLoading = false;
     }
@@ -396,6 +407,10 @@
       });
 
       const json = await res.json();
+      if (json.needsRegistration) {
+        await goto('/ganti-password');
+        return;
+      }
       submitResult = json;
       submitting = false;
 
@@ -434,6 +449,31 @@
 </svelte:head>
 
 <div class="mx-auto max-w-xl space-y-6">
+  <!-- Peringatan Utama di Paling Atas jika Perangkat Berbeda -->
+  {#if !deviceSyncLoading && deviceSyncData && !deviceSyncData.isTrusted}
+    <div class="rounded-2xl border-2 border-rose-300 bg-rose-50 p-4 text-xs shadow-xs space-y-2">
+      <div class="flex items-start justify-between gap-3">
+        <div class="flex items-start gap-2.5 text-rose-950">
+          <ShieldAlert class="h-5 w-5 text-rose-600 shrink-0 mt-0.5" />
+          <div>
+            <h4 class="font-bold text-rose-900 text-xs">Peringatan: Perangkat Berbeda Terdeteksi</h4>
+            <p class="mt-1 text-[11px] text-rose-800 leading-relaxed">
+              Akun Anda terdaftar di: <strong>{deviceSyncData.primaryDevice?.device_name || 'Perangkat Utama Lain'}</strong>.
+              <br />
+              Saat ini Anda mengakses dari: <strong>{currentDeviceInfo.deviceName}</strong>.
+            </p>
+          </div>
+        </div>
+        <span class="shrink-0 rounded-full bg-rose-200 px-2.5 py-0.5 text-[10px] font-bold text-rose-800">
+          Device Berbeda
+        </span>
+      </div>
+      <p class="text-[10px] font-medium text-rose-700 bg-rose-100/70 p-2 rounded-lg">
+        Aktivitas login dan presensi dari perangkat ini dicatat sebagai <strong>Perangkat Asing</strong> dan dilaporkan ke HR. Jika Anda mengganti HP/laptop, hubungi HR untuk mereset perangkat terdaftar.
+      </p>
+    </div>
+  {/if}
+
   <!-- Header Widget & Live Clock -->
   <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-600 via-emerald-700 to-teal-800 p-6 text-white shadow-xl shadow-emerald-700/20 sm:p-8">
     <div class="relative z-10 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
@@ -527,30 +567,7 @@
       <Smartphone class="h-4 w-4 text-slate-400" />
       <span>Memeriksa status perangkat pada database...</span>
     </div>
-  {:else if deviceSyncData && !deviceSyncData.isTrusted}
-    <!-- Peringatan Jelas: Perangkat Berbeda / Tidak Dikenal -->
-    <div class="rounded-2xl border border-rose-300 bg-rose-50 p-4 text-xs shadow-xs space-y-2">
-      <div class="flex items-start justify-between gap-3">
-        <div class="flex items-start gap-2.5 text-rose-950">
-          <ShieldAlert class="h-5 w-5 text-rose-600 shrink-0 mt-0.5" />
-          <div>
-            <h4 class="font-bold text-rose-900 text-xs">Perangkat Berbeda Terdeteksi</h4>
-            <p class="mt-1 text-[11px] text-rose-800 leading-relaxed">
-              Akun Anda terdaftar di: <strong>{deviceSyncData.primaryDevice?.device_name || 'Perangkat Utama Lain'}</strong>.
-              <br />
-              Saat ini Anda mengakses dari: <strong>{currentDeviceInfo.deviceName}</strong>.
-            </p>
-          </div>
-        </div>
-        <span class="shrink-0 rounded-full bg-rose-200 px-2.5 py-0.5 text-[10px] font-bold text-rose-800">
-          Device Berbeda
-        </span>
-      </div>
-      <p class="text-[10px] font-medium text-rose-700 bg-rose-100/70 p-2 rounded-lg">
-        Aktivitas dan presensi dari perangkat ini dicatat sebagai <strong>Perangkat Asing</strong> dan dilaporkan ke HR. Jika Anda mengganti HP/laptop, hubungi HR untuk mereset perangkat terdaftar.
-      </p>
-    </div>
-  {:else}
+  {:else if deviceSyncData?.isTrusted}
     <!-- Perangkat Utama Terverifikasi -->
     <div class="flex items-center justify-between rounded-2xl border border-emerald-200/80 bg-emerald-50/50 p-4 text-xs shadow-xs">
       <div class="flex items-center gap-2 text-slate-800">
@@ -561,6 +578,20 @@
         <Check class="h-3 w-3" />
         <span>Perangkat Utama</span>
       </span>
+    </div>
+  {:else if deviceSyncError}
+    <div class="flex items-center justify-between gap-3 rounded-2xl border border-amber-300 bg-amber-50 p-4 text-xs shadow-xs text-amber-900">
+      <div class="flex items-center gap-2">
+        <AlertTriangle class="h-4 w-4 shrink-0 text-amber-600" />
+        <span>{deviceSyncError}</span>
+      </div>
+      <button
+        type="button"
+        onclick={syncCurrentDevice}
+        class="shrink-0 rounded-lg border border-amber-300 bg-white px-2.5 py-1 text-[11px] font-semibold text-amber-900 hover:bg-amber-100"
+      >
+        Coba Lagi
+      </button>
     </div>
   {/if}
 

@@ -90,12 +90,24 @@ export async function handle({ event, resolve }) {
       throw redirect(303, '/login?error=inactive');
     }
 
-    if (profile.must_change_password && url !== '/ganti-password') {
+    if (profile.must_change_password && url !== '/ganti-password' && url !== '/auth/logout') {
       throw redirect(303, '/ganti-password');
     }
 
     if (!profile.must_change_password && url === '/ganti-password') {
-      throw redirect(303, isKaryawanRole ? '/presensi' : '/admin/dashboard');
+      let needsDeviceRegistration = false;
+      if (isKaryawanRole) {
+        const { data: trustedDevices } = await supabaseAdmin
+          .from('user_devices')
+          .select('id')
+          .eq('user_id', user.id)
+          .eq('is_trusted', true)
+          .limit(1);
+        needsDeviceRegistration = !trustedDevices || trustedDevices.length === 0;
+      }
+      if (!needsDeviceRegistration) {
+        throw redirect(303, isKaryawanRole ? '/presensi' : '/admin/dashboard');
+      }
     }
 
     if (url === '/login' || url === '/') {

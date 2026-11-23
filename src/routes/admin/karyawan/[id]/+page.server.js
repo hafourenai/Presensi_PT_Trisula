@@ -339,6 +339,6 @@ export const actions = {
       detail: { employeeId: id }
     });
 
-    return { successDevice: 'Semua perangkat berhasil direset. Perangkat berikutnya yang digunakan karyawan akan otomatis terdaftar sebagai Perangkat Utama.' };
+    return { successDevice: 'Semua perangkat berhasil direset. Karyawan akan diminta mengonfirmasi pendaftaran Perangkat Utama saat login berikutnya.' };
   }
 };

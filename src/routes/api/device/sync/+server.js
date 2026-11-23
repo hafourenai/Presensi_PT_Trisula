@@ -1,6 +1,10 @@
 import { json } from '@sveltejs/kit';
 import { supabaseAdmin } from '$lib/server/admin.js';
-import { alertUnrecognizedDevice } from '$lib/server/notifications.js';
+import {
+  evaluateLoginDevice,
+  extractClientIp,
+  recordUnrecognizedDevice
+} from '$lib/server/device-auth.js';
 
 export async function POST({ request, locals, getClientAddress }) {
   const { user, profile } = await locals.safeGetSession();
@@ -15,12 +19,7 @@ export async function POST({ request, locals, getClientAddress }) {
     }
 
     const now = new Date();
-    let ipAddress = '127.0.0.1';
-    try {
-      ipAddress = getClientAddress();
-    } catch {
-      ipAddress = request.headers.get('x-forwarded-for') || '127.0.0.1';
-    }
+    const ipAddress = extractClientIp(request, getClientAddress);
     const userAgent = request.headers.get('user-agent') || '';
 
     // Cari seluruh perangkat yang pernah terdaftar untuk akun karyawan ini
@@ -31,125 +30,73 @@ export async function POST({ request, locals, getClientAddress }) {
       .order('registered_at', { ascending: true });
 
     const devices = userDevices || [];
-    const matched = devices.find((d) => d.device_id === deviceId);
-    const primaryDevice = devices.find((d) => d.is_trusted);
+    const evalResult = evaluateLoginDevice({ devices, deviceId });
 
-    if (devices.length === 0) {
-      // Perangkat pertama kali: daftarkan langsung sebagai Perangkat Utama
-      const { data: newDevice, error: insErr } = await supabaseAdmin
-        .from('user_devices')
-        .insert({
-          user_id: user.id,
-          device_id: deviceId,
-          device_name: deviceName || 'Perangkat Utama',
-          user_agent: userAgent,
-          browser: browser || 'Unknown',
-          os: os || 'Unknown',
-          ip_address: ipAddress,
-          is_trusted: true,
-          registered_at: now.toISOString(),
-          last_used_at: now.toISOString()
-        })
-        .select()
-        .single();
-
-      if (insErr) {
-        console.error('Gagal menyimpan perangkat utama:', insErr);
-      }
-
+    // Jangan pernah mendaftarkan perangkat utama secara diam-diam tanpa konfirmasi eksplisit di /ganti-password
+    if (evalResult.status === 'needs_registration') {
       return json({
         success: true,
-        isRegistered: true,
-        isTrusted: true,
+        needsRegistration: true,
+        isRegistered: false,
+        isTrusted: false,
         isNewDevice: false,
-        device: newDevice,
-        status: 'primary',
-        message: 'Perangkat ini berhasil terdaftar sebagai Perangkat Utama Anda.'
+        device: null,
+        primaryDevice: null,
+        status: 'unregistered',
+        message: 'Perangkat utama belum didaftarkan. Silakan lakukan konfirmasi pendaftaran perangkat terlebih dahulu.'
       });
     }
 
-    if (matched) {
-      // Perangkat sudah pernah tercatat di DB
+    if (evalResult.status === 'trusted' && evalResult.primaryDevice) {
       await supabaseAdmin
         .from('user_devices')
         .update({
           last_used_at: now.toISOString(),
           ip_address: ipAddress,
-          device_name: deviceName || matched.device_name
+          device_name: deviceName || evalResult.primaryDevice.device_name
         })
-        .eq('id', matched.id);
+        .eq('id', evalResult.primaryDevice.id);
 
       return json({
         success: true,
+        needsRegistration: false,
         isRegistered: true,
-        isTrusted: matched.is_trusted,
+        isTrusted: true,
         isNewDevice: false,
-        device: matched,
-        primaryDevice: primaryDevice || null,
-        status: matched.is_trusted ? 'primary' : 'unrecognized',
-        message: matched.is_trusted
-          ? 'Perangkat Utama Terverifikasi'
-          : `Perangkat ini tercatat sebagai Perangkat Berbeda (Utama: ${primaryDevice?.device_name || 'Perangkat Lain'}).`
+        device: evalResult.primaryDevice,
+        primaryDevice: evalResult.primaryDevice,
+        status: 'primary',
+        message: 'Perangkat Utama Terverifikasi'
       });
     }
 
-    // Perangkat berbeda / ke-2 yang BELUM PERNAH dicatat sebelumnya:
-    // Simpan ke tabel user_devices dengan is_trusted = false
-    const { data: createdDevice, error: createErr } = await supabaseAdmin
-      .from('user_devices')
-      .insert({
-        user_id: user.id,
-        device_id: deviceId,
-        device_name: deviceName || 'Perangkat Tambahan',
-        user_agent: userAgent,
-        browser: browser || 'Unknown',
-        os: os || 'Unknown',
-        ip_address: ipAddress,
-        is_trusted: false,
-        registered_at: now.toISOString(),
-        last_used_at: now.toISOString()
-      })
-      .select()
-      .single();
-
-    if (createErr) {
-      console.error('Gagal mencatat perangkat berbeda:', createErr);
-    }
-
-    // Picu notifikasi deteksi perangkat berbeda ke HR dan karyawan
-    const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jakarta' }).format(now);
-    const timeFormatted = new Intl.DateTimeFormat('id-ID', {
-      timeZone: 'Asia/Jakarta',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false
-    }).format(now);
-
-    try {
-      await alertUnrecognizedDevice({
-        user,
-        profile,
-        deviceId,
-        deviceName: deviceName || 'Perangkat Berbeda',
-        browser: browser || 'Unknown',
-        os: os || 'Unknown',
-        ip: ipAddress,
-        timeStr: timeFormatted,
-        dateStr: today
-      });
-    } catch (notifErr) {
-      console.warn('Gagal mengirim peringatan notifikasi perangkat:', notifErr);
-    }
+    // Perangkat berbeda / tidak dikenal -> catat dengan is_trusted = false (alert dikirim hanya jika baru terdeteksi)
+    const { device: recordedDevice, isNewDevice } = await recordUnrecognizedDevice({
+      supabaseAdmin,
+      user,
+      profile,
+      devices,
+      deviceId,
+      deviceName: deviceName || 'Perangkat Tambahan',
+      browser: browser || 'Unknown',
+      os: os || 'Unknown',
+      userAgent,
+      ipAddress,
+      now,
+      context: 'presensi',
+      alwaysAlert: false
+    });
 
     return json({
       success: true,
+      needsRegistration: false,
       isRegistered: true,
       isTrusted: false,
-      isNewDevice: true,
-      device: createdDevice,
-      primaryDevice: primaryDevice || null,
+      isNewDevice,
+      device: recordedDevice,
+      primaryDevice: evalResult.primaryDevice || null,
       status: 'unrecognized',
-      message: `Perangkat Berbeda Terdeteksi! Akun Anda terdaftar di ${primaryDevice?.device_name || 'perangkat lain'}.`
+      message: `Perangkat Berbeda Terdeteksi! Akun Anda terdaftar di ${evalResult.primaryDevice?.device_name || 'perangkat lain'}.`
     });
   } catch (err) {
     console.error('Device sync error:', err);
