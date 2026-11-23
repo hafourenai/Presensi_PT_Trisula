@@ -443,7 +443,10 @@
           <div class="flex items-center justify-between pt-2">
             <p class="text-[11px] text-slate-400">
               {#if data.employee.work_lat && data.employee.work_lng}
-                <span class="text-emerald-600 font-medium">✓ Menggunakan lokasi khusus ({data.employee.work_location_name || 'Khusus'})</span>
+                <span class="inline-flex items-center gap-1 text-emerald-600 font-medium">
+                  <Check class="h-3 w-3" />
+                  <span>Menggunakan lokasi khusus ({data.employee.work_location_name || 'Khusus'})</span>
+                </span>
               {:else}
                 <span>Mengikuti titik koordinat & radius default kantor utama</span>
               {/if}

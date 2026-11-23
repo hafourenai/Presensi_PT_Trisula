@@ -13,7 +13,8 @@
     ShieldAlert,
     Info,
     RotateCcw,
-    Smartphone
+    Smartphone,
+    Check
   } from '@lucide/svelte';
   import { getBrowserInfo, getOrCreateDeviceId } from '$lib/device.js';
   import { calculateDistance } from '$lib/geo.js';
@@ -533,7 +534,7 @@
         <div class="flex items-start gap-2.5 text-rose-950">
           <ShieldAlert class="h-5 w-5 text-rose-600 shrink-0 mt-0.5" />
           <div>
-            <h4 class="font-bold text-rose-900 text-xs">⚠️ Perangkat Berbeda Terdeteksi</h4>
+            <h4 class="font-bold text-rose-900 text-xs">Perangkat Berbeda Terdeteksi</h4>
             <p class="mt-1 text-[11px] text-rose-800 leading-relaxed">
               Akun Anda terdaftar di: <strong>{deviceSyncData.primaryDevice?.device_name || 'Perangkat Utama Lain'}</strong>.
               <br />
@@ -557,7 +558,8 @@
         <span>Perangkat terdaftar: <strong>{currentDeviceInfo.deviceName || 'Perangkat Utama'}</strong></span>
       </div>
       <span class="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-0.5 text-[10px] font-bold text-emerald-800">
-        ✓ Perangkat Utama
+        <Check class="h-3 w-3" />
+        <span>Perangkat Utama</span>
       </span>
     </div>
   {/if}
@@ -609,8 +611,11 @@
         </div>
 
         {#if locationData.accuracy > 100}
-          <div class="rounded-lg bg-amber-100/70 p-2 text-[10px] text-amber-800 leading-relaxed mt-1">
-            💡 <strong>Tips Akurasi:</strong> Jika menggunakan HP, pastikan mode GPS <em>"Akurasi Tinggi"</em> aktif dan hindari berada di dalam ruangan tertutup tanpa jendela agar sinyal satelit GPS dapat terkunci maksimal.
+          <div class="rounded-lg bg-amber-100/70 p-2.5 text-[10px] text-amber-900 leading-relaxed mt-1 flex items-start gap-1.5">
+            <Info class="h-3.5 w-3.5 shrink-0 text-amber-700 mt-0.5" />
+            <div>
+              <strong>Petunjuk Akurasi:</strong> Jika menggunakan perangkat ponsel, pastikan mode GPS <em>"Akurasi Tinggi"</em> aktif dan berada di area terbuka agar sinyal satelit GPS dapat terkunci maksimal.
+            </div>
           </div>
         {/if}
       </div>

@@ -29,7 +29,7 @@ export async function createNotification({ userId = null, targetRole = null, tit
 }
 
 export async function alertUnrecognizedDevice({ user, profile, deviceId, deviceName, browser, os, ip, timeStr, dateStr }) {
-  const alertTitle = '⚠️ Peringatan Presensi dari Perangkat Tidak Dikenal';
+  const alertTitle = '[Peringatan] Presensi dari Perangkat Tidak Dikenal';
   const employeeName = profile?.full_name || 'Karyawan';
   const nip = profile?.nip || '-';
   const dept = profile?.department?.name || profile?.department_name || '-';
@@ -52,15 +52,15 @@ export async function alertUnrecognizedDevice({ user, profile, deviceId, deviceN
     payload: { userId: user.id, nip, employeeName, deviceId, deviceName, browser, os, ip, dateStr, timeStr }
   });
 
-  const telegramMsg = `⚠️ <b>PERINGATAN DETEKSI PERANGKAT PRESENSI</b>
+  const telegramMsg = `<b>[PERINGATAN DETEKSI PERANGKAT PRESENSI]</b>
 ━━━━━━━━━━━━━━━━━━
-👤 <b>Karyawan:</b> ${employeeName}
-🆔 <b>NIP:</b> ${nip}
-🏢 <b>Departemen:</b> ${dept}
-⏰ <b>Waktu:</b> ${dateStr} ${timeStr} WIB
-📱 <b>Perangkat:</b> ${deviceName || 'Tidak Dikenal'}
-🌐 <b>Browser/OS:</b> ${browser || '-'} / ${os || '-'}
-📍 <b>Status:</b> Presensi diizinkan dengan penandaan (Flagged)
+Karyawan: <b>${employeeName}</b>
+NIP: <b>${nip}</b>
+Departemen: <b>${dept}</b>
+Waktu: <b>${dateStr} ${timeStr} WIB</b>
+Perangkat: <b>${deviceName || 'Tidak Dikenal'}</b>
+Browser/OS: <b>${browser || '-'} / ${os || '-'}</b>
+Status: <b>Presensi diizinkan dengan penandaan (Flagged)</b>
 ━━━━━━━━━━━━━━━━━━
 <i>Pemberitahuan otomatis sistem Anti-Joki Presensi Web</i>`;
 
