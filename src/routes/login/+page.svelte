@@ -1,6 +1,6 @@
 <script>
   import { enhance } from '$app/forms';
-  import { Eye, EyeOff, LogIn, ShieldAlert, Building2 } from '@lucide/svelte';
+  import { Eye, EyeOff, LogIn, ShieldAlert, Building2, ShieldCheck } from '@lucide/svelte';
 
   let { form, data } = $props();
 
@@ -126,10 +126,15 @@
       </div>
     </div>
 
-    <!-- Security info footer -->
-    <div class="mt-8 text-center text-xs text-slate-400">
-      <p>Dilindungi dengan Enkripsi SSL/HTTPS & PostgreSQL RLS</p>
-      <p class="mt-1">Waktu server terstandarisasi zona WIB (Asia/Jakarta)</p>
+    <!-- Security & Corporate Footer -->
+    <div class="mt-8 text-center text-xs text-slate-500 space-y-1">
+      <div class="flex items-center justify-center gap-1.5 font-medium text-slate-600">
+        <ShieldCheck class="h-3.5 w-3.5 text-emerald-600" />
+        <span>Koneksi Aman & Data Kepegawaian Terenkripsi</span>
+      </div>
+      <p class="text-[11px] text-slate-400">
+        © 2026 PT Trisula Prima Agung · Sinkronisasi Waktu Server Resmi (WIB)
+      </p>
     </div>
   </div>
 </div>
