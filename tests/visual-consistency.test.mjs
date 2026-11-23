@@ -38,3 +38,19 @@ test('interactive cursor pointer and navigation loading indicator are configured
   assert.match(layout, /navigating\.to/);
   assert.match(layout, /class="nav-loading-bar"/);
 });
+
+test('admin dashboard uses balanced two-column content grid without nested page padding', async () => {
+  const dashboard = await readFile(new URL('../src/routes/admin/dashboard/+page.svelte', import.meta.url), 'utf8');
+  assert.match(dashboard, /class="content-grid"/);
+  assert.match(dashboard, /class="side-column"/);
+  assert.doesNotMatch(dashboard, /\.attendance-dashboard\s*\{[^}]*padding:/);
+});
+
+test('settings form aligns three-column inputs and uses concise single-line labels', async () => {
+  const settings = await readFile(new URL('../src/routes/admin/pengaturan/+page.svelte', import.meta.url), 'utf8');
+  assert.match(settings, />Toleransi \(Menit\)</);
+  assert.match(settings, />Radius \(Meter\)</);
+  assert.match(settings, /class="flex flex-col"/);
+  assert.match(settings, /mt-auto/);
+});
+

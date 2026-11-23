@@ -86,33 +86,33 @@
         }}
         class="mt-6 space-y-4 text-xs"
       >
-        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <div>
-            <label for="work_start" class="block font-semibold uppercase tracking-wider text-slate-700">Jam Masuk (WIB)</label>
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <div class="flex flex-col">
+            <label for="work_start" class="block text-[11px] font-semibold uppercase tracking-wide text-slate-700 leading-snug">Jam Masuk (WIB)</label>
             <input
               id="work_start"
               type="time"
               name="work_start"
               value={data.settings?.work_start || '08:00'}
               required
-              class="mt-1.5 w-full rounded-xl border border-slate-200 bg-slate-50/50 p-3 text-slate-900 focus:outline-none"
+              class="mt-auto pt-1.5 w-full rounded-xl border border-slate-200 bg-slate-50/50 p-3 text-slate-900 focus:outline-none"
             />
           </div>
 
-          <div>
-            <label for="work_end" class="block font-semibold uppercase tracking-wider text-slate-700">Jam Pulang (WIB)</label>
+          <div class="flex flex-col">
+            <label for="work_end" class="block text-[11px] font-semibold uppercase tracking-wide text-slate-700 leading-snug">Jam Pulang (WIB)</label>
             <input
               id="work_end"
               type="time"
               name="work_end"
               value={data.settings?.work_end || '16:00'}
               required
-              class="mt-1.5 w-full rounded-xl border border-slate-200 bg-slate-50/50 p-3 text-slate-900 focus:outline-none"
+              class="mt-auto pt-1.5 w-full rounded-xl border border-slate-200 bg-slate-50/50 p-3 text-slate-900 focus:outline-none"
             />
           </div>
 
-          <div class="sm:col-span-2 lg:col-span-1">
-            <label for="late_tolerance_min" class="block font-semibold uppercase tracking-wider text-slate-700">Toleransi Terlambat (Menit)</label>
+          <div class="flex flex-col">
+            <label for="late_tolerance_min" class="block text-[11px] font-semibold uppercase tracking-wide text-slate-700 leading-snug">Toleransi (Menit)</label>
             <input
               id="late_tolerance_min"
               type="number"
@@ -120,24 +120,24 @@
               value={data.settings?.late_tolerance_min || 0}
               min="0"
               max="480"
-              class="mt-1.5 w-full rounded-xl border border-slate-200 bg-slate-50/50 p-3 text-slate-900 focus:outline-none"
+              class="mt-auto pt-1.5 w-full rounded-xl border border-slate-200 bg-slate-50/50 p-3 text-slate-900 focus:outline-none"
             />
           </div>
         </div>
 
         <!-- Input Cepat Link Google Maps Kantor -->
         <div class="rounded-2xl border border-emerald-200/70 bg-emerald-50/40 p-3.5 space-y-2">
-          <label for="maps_office_link" class="block text-[11px] font-semibold text-emerald-950 flex items-center gap-1">
-            <Link2 class="h-3.5 w-3.5 text-emerald-700" />
+          <label for="maps_office_link" class="flex items-start gap-1.5 text-[11px] font-semibold text-emerald-950 leading-snug">
+            <Link2 class="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-700" />
             <span>Tempel Link Google Maps Kantor Utama (maps.app.goo.gl / google.com/maps)</span>
           </label>
-          <div class="flex gap-2">
+          <div class="flex flex-col gap-2 sm:flex-row">
             <input
               id="maps_office_link"
               type="text"
               bind:value={mapsUrlInput}
               placeholder="Contoh: https://maps.app.goo.gl/3YJ3u9xY9ofUjGKU6"
-              class="flex-1 rounded-xl border border-emerald-200 bg-white px-3 py-2 text-xs text-slate-900 placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none"
+              class="min-w-0 flex-1 rounded-xl border border-emerald-200 bg-white px-3 py-2 text-xs text-slate-900 placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none"
             />
             <button
               type="button"
@@ -155,9 +155,9 @@
           {/if}
         </div>
 
-        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 border-t border-slate-100 pt-4">
-          <div>
-            <label for="office_lat" class="block font-semibold uppercase tracking-wider text-slate-700">Latitude Kantor</label>
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-3 border-t border-slate-100 pt-4">
+          <div class="flex flex-col">
+            <label for="office_lat" class="block text-[11px] font-semibold uppercase tracking-wide text-slate-700 leading-snug">Latitude Kantor</label>
             <input
               id="office_lat"
               type="number"
@@ -165,12 +165,12 @@
               name="office_lat"
               bind:value={officeLatInput}
               placeholder="-6.200000"
-              class="mt-1.5 w-full rounded-xl border border-slate-200 bg-slate-50/50 p-3 text-slate-900 focus:outline-none"
+              class="mt-auto pt-1.5 w-full rounded-xl border border-slate-200 bg-slate-50/50 p-3 text-slate-900 focus:outline-none"
             />
           </div>
 
-          <div>
-            <label for="office_lng" class="block font-semibold uppercase tracking-wider text-slate-700">Longitude Kantor</label>
+          <div class="flex flex-col">
+            <label for="office_lng" class="block text-[11px] font-semibold uppercase tracking-wide text-slate-700 leading-snug">Longitude Kantor</label>
             <input
               id="office_lng"
               type="number"
@@ -178,25 +178,25 @@
               name="office_lng"
               bind:value={officeLngInput}
               placeholder="106.816666"
-              class="mt-1.5 w-full rounded-xl border border-slate-200 bg-slate-50/50 p-3 text-slate-900 focus:outline-none"
+              class="mt-auto pt-1.5 w-full rounded-xl border border-slate-200 bg-slate-50/50 p-3 text-slate-900 focus:outline-none"
             />
           </div>
 
-          <div class="sm:col-span-2 lg:col-span-1">
-            <label for="office_radius_m" class="block font-semibold uppercase tracking-wider text-slate-700">Radius Kantor (Meter)</label>
+          <div class="flex flex-col">
+            <label for="office_radius_m" class="block text-[11px] font-semibold uppercase tracking-wide text-slate-700 leading-snug">Radius (Meter)</label>
             <input
               id="office_radius_m"
               type="number"
               name="office_radius_m"
               value={data.settings?.office_radius_m || 100}
               min="10"
-              class="mt-1.5 w-full rounded-xl border border-slate-200 bg-slate-50/50 p-3 text-slate-900 focus:outline-none"
+              class="mt-auto pt-1.5 w-full rounded-xl border border-slate-200 bg-slate-50/50 p-3 text-slate-900 focus:outline-none"
             />
           </div>
         </div>
 
         <div class="border-t border-slate-100 pt-4">
-          <label for="photo_retention_days" class="block font-semibold uppercase tracking-wider text-slate-700">Kebijakan Retensi Foto (Hari)</label>
+          <label for="photo_retention_days" class="block text-[11px] font-semibold uppercase tracking-wide text-slate-700 leading-snug">Kebijakan Retensi Foto (Hari)</label>
           <input
             id="photo_retention_days"
             type="number"
